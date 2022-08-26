@@ -49,6 +49,15 @@ const routes: Routes = [
         ]
       },
       {
+        path: 'escape-room',
+        children: [
+          {
+            path: '',
+            loadChildren: '../escape-room/escape-room.module#EscapeRoomPageModule'
+          }
+        ]
+      },
+      {
         path: '',
         redirectTo: '/tabs/inici',
         pathMatch: 'full',

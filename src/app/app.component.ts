@@ -72,4 +72,8 @@ export class AppComponent {
   GoMisJuegosInactivos() {
     this.route.navigateByUrl('tabs/mis-juegos-inactivos');
   } 
+
+  GoEscapeRoom()  {
+    this.route.navigateByUrl('tabs/escape-room');
+  }
 }
