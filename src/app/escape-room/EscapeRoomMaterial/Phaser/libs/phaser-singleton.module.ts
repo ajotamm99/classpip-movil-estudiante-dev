@@ -3,7 +3,6 @@ import { ModuleWithProviders, NgModule, NgZone, Optional, SkipSelf } from '@angu
 //import { SwordTypeEnum } from '@company-name/shared/data-access-model';
 import * as Phaser from 'phaser';
 import { Subject } from 'rxjs';
-
 import { WorldScene } from './scenes/world.scene';
 
 /**
@@ -22,11 +21,11 @@ export class PhaserSingletonService {
     public static actionsHistory: string[] = []; // * Since phaser is a singleton, let's store the history of actions here for all components.
     //public static shopObservable: Subject<SwordTypeEnum> = new Subject<SwordTypeEnum>();
 
-    constructor(private _ngZone: NgZone, @Optional() @SkipSelf() parentModule?: PhaserSingletonService) {
+    constructor(private ngZone: NgZone, @Optional() @SkipSelf() parentModule?: PhaserSingletonService) {
         if (parentModule) {
             console.error('Phaser Singleton is already loaded. Import it in the AppModule only');
         } else {
-            PhaserSingletonService.ngZone = this._ngZone;
+            PhaserSingletonService.ngZone = this.ngZone;
             PhaserSingletonService.actionsHistory.push('Initializing Phaser...');
         }
     }
@@ -51,6 +50,7 @@ export class PhaserSingletonService {
         //* Param 2: Set to false  If you do need to create another game instance on the same page
         if (PhaserSingletonService.activeGame) {
             PhaserSingletonService.activeGame.destroy(true, false);
+            //this.ngZone.run;
         }
     }
 
@@ -70,7 +70,7 @@ export class PhaserSingletonService {
          * * https://angular.io/guide/zone
          */
         console.log("running singleton");
-        //this.ngZone.runOutsideAngular(() => {
+        this.ngZone.runOutsideAngular(() => {
 
             
 
@@ -79,8 +79,12 @@ export class PhaserSingletonService {
                 // https://photonstorm.github.io/phaser3-docs/Phaser.Scale.ScaleManager.html
                 PhaserSingletonService.activeGame = new Phaser.Game({
                     type: Phaser.AUTO,
-                    width: 800,
-                    height: 600,
+                    scale: {
+                        mode: Phaser.Scale.RESIZE,
+                        width: window.innerWidth,
+                        autoCenter: Phaser.Scale.CENTER_BOTH,
+                        height: window.innerHeight,
+                    },
                     parent: 'phaser-example',
                     physics: {
                         default: 'arcade',
@@ -88,7 +92,11 @@ export class PhaserSingletonService {
                             gravity: { y: 200 }
                         }
                     },
-                    scene: [WorldScene]
+                    scene: [WorldScene],
+                    render: {
+                        transparent: false,
+                        pixelArt: true,
+                    },
                     /*type: Phaser.AUTO,
                     scale: {
                         mode: Phaser.Scale.RESIZE,
@@ -112,7 +120,8 @@ export class PhaserSingletonService {
             }
             
         
-    }
+        })
+        }
 
    
 

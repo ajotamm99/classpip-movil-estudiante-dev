@@ -15,11 +15,14 @@ export class WorldScene extends Phaser.Scene {
     }
 
     async preload(): Promise<void> {
+
         this.load.setBaseURL('http://labs.phaser.io');
+
+        // this.load.setBaseURL('http://labs.phaser.io');
         
-                this.load.image('sky', 'assets/skies/space3.png');
-                this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-                this.load.image('red', 'assets/particles/red.png');
+        this.load.image('sky', 'assets/skies/space3.png');
+        this.load.image('logo', 'assets/sprites/phaser3-logo.png');
+        this.load.image('red', 'assets/particles/red.png');
     }
 
     /**
@@ -31,6 +34,8 @@ export class WorldScene extends Phaser.Scene {
      * * Phaser will only call create after all assets in Preload have been loaded
      */
     async create(): Promise<void> {
+
+
         this.add.image(400, 300, 'sky');
         
         var particles = this.add.particles('red');
