@@ -70,7 +70,7 @@ export class PhaserSingletonService {
          * * https://angular.io/guide/zone
          */
         console.log("running singleton");
-        this.ngZone.runOutsideAngular(() => {
+        /*PhaserSingletonService.ngZone.runOutsideAngular(() => {*/
 
             
 
@@ -119,8 +119,6 @@ export class PhaserSingletonService {
                 });
             }
             
-        
-        })
         }
 
    

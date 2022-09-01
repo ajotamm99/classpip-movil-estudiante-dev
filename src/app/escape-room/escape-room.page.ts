@@ -1,5 +1,5 @@
 import { PhaserSingletonService } from './EscapeRoomMaterial/Phaser/libs/phaser-singleton.module';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import Phaser from 'phaser';
 
 @Component({
@@ -9,10 +9,13 @@ import Phaser from 'phaser';
 })
 export class EscapeRoomPage implements OnInit {
 
-  constructor() { }
+  constructor(private ngZone: NgZone) { }
 
   async ngOnInit() {
-    await PhaserSingletonService.init();
+    await this.ngZone.runOutsideAngular(async ()=>{
+      await PhaserSingletonService.init();
+    });
+    
   }
 
 }
