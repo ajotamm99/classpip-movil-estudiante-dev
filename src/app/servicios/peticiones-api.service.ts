@@ -23,6 +23,10 @@ import {JuegoDeEvaluacion} from '../clases/JuegoDeEvaluacion';
 import {AlumnoJuegoDeEvaluacion} from '../clases/AlumnoJuegoDeEvaluacion';
 import {EquipoJuegoDeEvaluacion} from '../clases/EquipoJuegoDeEvaluacion';
 import { EquipoJuegoDeVotacionTodosAUno } from '../clases/EquipoJuegoDeVotacionTodosAUno';
+import { EscenaActiva } from '../clases/clasesParaJuegoDeEscapeRoom/EscenaActiva';
+import { ObjetoActivo } from '../clases/clasesParaJuegoDeEscapeRoom/ObjetoActivo';
+import { PreguntaActiva } from '../clases/clasesParaJuegoDeEscapeRoom/PreguntaActiva';
+import { AlumnoJuegoDeEscaperoom } from '../clases/clasesParaJuegoDeEscapeRoom/AlumnoJuegoDeEscaperoom';
 
 @Injectable({
   providedIn: 'root'
@@ -129,6 +133,25 @@ export class PeticionesAPIService {
   private APIUrlAlumnoJuegoDeControlDeTrabajoEnEquipo = this.base + '3000/api/alumnosJuegoDeControlDeTrabajoEnEquipo';
 
   private APIUrlAlumnoJuegoDeVotacionAOpciones = this.base + '3000/api/alumnosJuegoDeVotacionAOpciones';
+
+//url escaperoom
+
+
+private APIURLJuegoDeEscaperoom = this.base + ':3000/api/juegoescaperoom';
+private APIURLEscenariosEscaperoom = this.base + ':3000/api/escenarioescaperoom';
+private APIURLEscenasEscaperoom = this.base + ':3000/api/escenasescaperoom';
+private APIURLEscenasActivas= this.base + ':3000/api/escenaescaperoomactiva';
+private APIUrlEquipoJuegoDeEscaperoom = this.base + ':3000/api/equipoescaperoom';
+private APIUrlAlumnoJuegoDeEscaperoom = this.base + ':3000/api/alumnoescaperoom';
+
+private APIURLObjetosEscaperoom = this.base + ':3000/api/objetosescaperoom';
+private APIUrlObjetosActivos= this.base + ':3000/api/objetoactivoescaperoom';
+
+private APIUrlPreguntasActivas =this.base + ':3000/api/preguntasactivas';
+
+private APIURLSkinsEscaperoom = this.base + ':3000/api/skins';
+
+private APIURLSkinsActivas = this.base + ':3000/api/skinactivas';
 
   constructor(
     private http: HttpClient,
@@ -1308,6 +1331,36 @@ public PonerNotaAlumnoJuegoDeGeocaching(alumnoJuegoDeGeocaching: AlumnoJuegoDeGe
   public RegistraVotacionAOpciones(alumnoJuegoDeVotacionAOpciones: AlumnoJuegoDeVotacionAOpciones): Observable<AlumnoJuegoDeVotacionAOpciones> {
     // tslint:disable-next-line:max-line-length
     return this.http.put<AlumnoJuegoDeVotacionAOpciones>(this.APIUrlAlumnoJuegoDeVotacionAOpciones + '/' + alumnoJuegoDeVotacionAOpciones.id, alumnoJuegoDeVotacionAOpciones);
+  }
+
+  //juego de Escaperoom
+
+  public DameEscenasActivasEscaperoom(escenaActiva: EscenaActiva, id:number): Observable<EscenaActiva> {
+    return this.http.get<EscenaActiva>(this.APIURLJuegoDeEscaperoom + '/' + id  + '/escenaActivas');
+  }
+
+  public DameObjetoActivoEscaperoom(objetoActivo: ObjetoActivo, id: number): Observable<ObjetoActivo>{
+    return this.http.get<ObjetoActivo>(this.APIURLEscenasActivas+ '/' + id  + '/objetoActivos');
+  }
+
+  public DamePreguntaActivaEscaperoom(preguntaAct: PreguntaActiva, id: number): Observable<PreguntaActiva>{
+    return this.http.get<PreguntaActiva>(this.APIUrlPreguntasActivas);
+  }
+
+  public DameInscripcionesAlumnoJuegoEscaperoom(juegoDeEscaperoomId: number): Observable<AlumnoJuegoDeEscaperoom[]> {
+    return this.http.get<AlumnoJuegoDeEscaperoom[]>(this.APIUrlAlumnoJuegoDeEscaperoom
+    + '?filter[where][juegoDeEscaperoomId]=' + juegoDeEscaperoomId);
+  }
+
+     // Da la inscripción de un alumno concreto
+  public DameInscripcionAlumnoJuegoDeEscaperoom(juegoId: number, alumnoId: number): Observable<AlumnoJuegoDeEscaperoom[]> {
+      return this.http.get<AlumnoJuegoDeEscaperoom[]>(this.APIUrlAlumnoJuegoDeVotacionTodosAUno
+      + '?filter[where][juegoDeEscaperoomId]=' + juegoId +  '&filter[where][alumnoId]=' + alumnoId);
+  }
+
+  public DameAlumnosjuegoDeEscaperoom(idJuego: number): Observable<Alumno[]> {
+    return this.http.get<Alumno[]>(this.APIURLJuegoDeEscaperoom + '/' + idJuego + '/alumnos');
+
   }
   
 }

@@ -4,6 +4,7 @@ import { ModuleWithProviders, NgModule, NgZone, Optional, SkipSelf } from '@angu
 import * as Phaser from 'phaser';
 import { Subject } from 'rxjs';
 import { WorldScene } from './scenes/world.scene';
+import { LoadingScene } from './scenes/LoadingScene.scene'
 
 /**
  * * The PhaserInstance is a singleton that controls the Game Scene, which is the UI portion of the Game Engine
@@ -92,7 +93,7 @@ export class PhaserSingletonService {
                             gravity: { y: 200 }
                         }
                     },
-                    scene: [WorldScene],
+                    scene: [WorldScene, LoadingScene],
                     render: {
                         transparent: false,
                         pixelArt: true,

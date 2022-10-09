@@ -104,7 +104,9 @@ export class IniciPage implements OnInit {
       this.navCtrl.navigateForward('/juego-evaluacion');
     } else if (juego.Tipo === 'Control de trabajo en equipo') {
       this.navCtrl.navigateForward('/juego-de-control-de-trabajo-en-equipo');
-    } else {
+    } else if (juego.Tipo === 'Juego De Escaperoom'){
+      this.navCtrl.navigateForward('/escape-room');
+    } else{
       this.navCtrl.navigateForward('/juego-colleccion');
     }
   }

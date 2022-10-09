@@ -11,18 +11,18 @@ export class WorldScene extends Phaser.Scene {
     
 
     constructor() {
-        super({ key: 'preloader' });
+        super({ key: 'main' });
     }
 
     async preload(): Promise<void> {
 
-        this.load.setBaseURL('http://labs.phaser.io');
+        //this.load.setBaseURL('http://labs.phaser.io');
 
         // this.load.setBaseURL('http://labs.phaser.io');
         
-        this.load.image('sky', 'assets/skies/space3.png');
-        this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-        this.load.image('red', 'assets/particles/red.png');
+        this.load.image('tiles', 'http://localhost:3000/api/imagenes/ImagenesEscenas/download/mainlevbuild.png');
+        this.load.tilemapTiledJSON('map', 'http://localhost:3000/api/imagenes/ArchivosEscenas/download/escena.json');
+        //this.load.image('red', 'assets/particles/red.png');
     }
 
     /**
@@ -35,24 +35,49 @@ export class WorldScene extends Phaser.Scene {
      */
     async create(): Promise<void> {
 
-
-        this.add.image(400, 300, 'sky');
+        var map=this.make.tilemap({key:'map'});
+        var tilesheet=map.addTilesetImage('tilesetincial','tiles');
         
-        var particles = this.add.particles('red');
+        var layer1 = map.createLayer('suelo',tilesheet);
+        var solid= map.createLayer('solid', tilesheet);
 
-        var emitter = particles.createEmitter({
-            speed: 100,
-            scale: { start: 1, end: 0 },
-            blendMode: 'ADD'
-        });
 
-        var logo = this.physics.add.image(400, 100, 'logo');
+    // The first parameter is the name of the tileset in Tiled and the second parameter is the key
+    // of the tileset image used when loading the file in preload.
+    //var tiles = map.addTilesetImage('cybernoid', 'tiles');
 
-        logo.setVelocity(100, 200);
-        logo.setBounce(1, 1);
-        logo.setCollideWorldBounds(true);
+    // You can load a layer from the map using the layer name from Tiled, or by using the layer
+    // index (0 in this case).
+    //var layer = map.createLayer(0, tiles, 0, 0);
 
-        emitter.startFollow(logo);
+        //solid.setCollisionByProperty({collides: true});
+        //const debug=this.add.graphics().setAlpha(0.7);
+        //solid.renderDebug(debug,
+           //{tileColor:null,
+               // collidingTileColor:new Phaser.Display.Color(255,100,100,255),
+               // faceColor: new Phaser.Display.Color(40,39,37,255),
+
+
+            
+
+
+        // this.add.image(400, 300, 'sky');
+        
+        // var particles = this.add.particles('red');
+
+        // var emitter = particles.createEmitter({
+        //     speed: 100,
+        //     scale: { start: 1, end: 0 },
+        //     blendMode: 'ADD'
+        // });
+
+        // var logo = this.physics.add.image(400, 100, 'logo');
+
+        // logo.setVelocity(100, 200);
+        // logo.setBounce(1, 1);
+        // logo.setCollideWorldBounds(true);
+
+        // emitter.startFollow(logo);
     }
 
     /**
