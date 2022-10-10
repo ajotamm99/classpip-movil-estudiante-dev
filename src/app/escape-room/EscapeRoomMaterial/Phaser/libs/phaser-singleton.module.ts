@@ -93,7 +93,7 @@ export class PhaserSingletonService {
                             gravity: { y: 200 }
                         }
                     },
-                    scene: [WorldScene, LoadingScene],
+                    scene: [LoadingScene, WorldScene],
                     render: {
                         transparent: false,
                         pixelArt: true,

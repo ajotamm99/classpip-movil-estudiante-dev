@@ -729,6 +729,20 @@ export class CalculosService {
         } catch {
           console.log ('No hay juegos de cuestionario en equipo');
         }
+
+        console.log('* voy a por los juegos de escaperoom del alumno');
+      try {
+        lista = await this.peticionesAPI.DameJuegoDeEscaperoomAlumno(AlumnoId).toPromise();
+        for (let i = 0; i < (lista.length); i++) {
+          if (lista[i].JuegoActivo === true) {
+            JuegosActivos.push(lista[i]);
+          } else {
+            JuegosInactivos.push(lista[i]);
+          }
+        }
+      } catch {
+        console.log ('No hay juegos de escaperoom');
+      }
       }
       const juegos  = {
           activos: JuegosActivos,

@@ -1,6 +1,11 @@
+import { EscenaActiva } from './../clases/clasesParaJuegoDeEscapeRoom/EscenaActiva';
+import { ObjetoEscaperoom } from './../clases/clasesParaJuegoDeEscapeRoom/ObjetoEscaperoom';
+import { PreguntaActiva } from './../clases/clasesParaJuegoDeEscapeRoom/PreguntaActiva';
+import { ObjetoActivo } from './../clases/clasesParaJuegoDeEscapeRoom/ObjetoActivo';
+import { EscenaEscaperoom } from './../clases/clasesParaJuegoDeEscapeRoom/EscenaEscaperoom';
 import { Injectable } from '@angular/core';
 import { Profesor, Grupo, Juego, Equipo, Alumno, Coleccion, Cromo, Punto, Insignia, TablaAlumnoJuegoDeCompeticion,
-         TablaJornadas, Jornada, TablaEquipoJuegoDeCompeticion, JuegoDeAvatar } from '../clases';
+         TablaJornadas, Jornada, TablaEquipoJuegoDeCompeticion, JuegoDeAvatar, Pregunta } from '../clases';
 import { AnonymousSubject } from 'rxjs/internal/Subject';
 import { ReplaySubject } from 'rxjs';
 import {JuegoDeEvaluacion} from '../clases/JuegoDeEvaluacion';
@@ -11,6 +16,7 @@ import {EquipoJuegoDeEvaluacion} from '../clases/EquipoJuegoDeEvaluacion';
   providedIn: 'root'
 })
 export class SesionService {
+
 
   alumno: Alumno;
   alumnoObservable = new ReplaySubject(1);
@@ -81,6 +87,14 @@ export class SesionService {
   respuestas: any[];
   evaluacionesPendientes: number;
   evaluacionesARecibir: number;
+
+  //escaperoom
+  Escenas: EscenaEscaperoom[]=[];
+  ObjetosActivos: ObjetoActivo[]=[];
+  Preguntas: Pregunta[]=[];
+  PreguntasActivas: PreguntaActiva[]=[];
+  Objetos: ObjetoEscaperoom[]=[];
+  EscenasActivas: EscenaActiva[]=[];
 
   constructor() { }
   public TomaProfesor(profesor: Profesor) {
@@ -569,6 +583,44 @@ export class SesionService {
   public DameEvaluacionesARecibir(): number {
     return this.evaluacionesARecibir;
   }
+  //escaperoom
+  public TomaEscenas(escenas: EscenaEscaperoom[]){
+    this.Escenas=escenas;
+  }
+  public DameEscenas(){
+    return this.Escenas;
+  }
+  public TomaObjetosActivos(objetosEscaperoom: ObjetoActivo[]){
+    this.ObjetosActivos=objetosEscaperoom;
+  }
+  public DameObjetosActivos(){
+    return this.ObjetosActivos;
+  }
+  public TomaPreguntas(preguntas: Pregunta[]){
+    this.Preguntas=preguntas;
+  }
+  public DamePreguntas(){
+    return this.Preguntas;
+  }
+  public TomaPreguntasActivas(preguntasActivas: PreguntaActiva[]){
+    this.PreguntasActivas=preguntasActivas;
+  }
+  public DamePreguntasActivas(){
+    return this.PreguntasActivas;
+  }
+  public TomaObjetos(objetos: ObjetoEscaperoom[]){
+    this.Objetos= objetos;
+  }
+  public DameObjetos(){
+    return this.Objetos;
+  }
+  public TomaEscenasActivas(escenasActivas: EscenaActiva[]){
+    this.EscenasActivas=escenasActivas;
+  }
+  public DameEscenasActivas(){
+    return this.EscenasActivas;
+  }
+
 }
 
 

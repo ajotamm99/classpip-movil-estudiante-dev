@@ -4,7 +4,7 @@ export class JuegoDeEscapeRoom {
     escenarioEscaperoomId: number;
     grupoId: number;
     TiempoLimite: number;
-    Nombre:string;
+    NombreJuego:string;
     Activo: boolean;
     Tipo: string;
     Presencial: string;
@@ -18,7 +18,7 @@ export class JuegoDeEscapeRoom {
         this.escenarioEscaperoomId =escenarioEscaperoomId;
         this.grupoId=grupoId;
         this.TiempoLimite=TiempoLimite;
-        this.Nombre= Nombre;
+        this.NombreJuego= Nombre;
         this.Tipo =Tipo;
         this.Modo =Modo;
         this.Online=Online;

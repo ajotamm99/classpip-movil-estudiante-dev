@@ -20,8 +20,8 @@ export class WorldScene extends Phaser.Scene {
 
         // this.load.setBaseURL('http://labs.phaser.io');
         
-        this.load.image('tiles', 'http://localhost:3000/api/imagenes/ImagenesEscenas/download/mainlevbuild.png');
-        this.load.tilemapTiledJSON('map', 'http://localhost:3000/api/imagenes/ArchivosEscenas/download/escena.json');
+        //this.load.image('tiles', 'http://localhost:3000/api/imagenes/ImagenesEscenas/download/mainlevbuild.png');
+        //this.load.tilemapTiledJSON('map', 'http://localhost:3000/api/imagenes/ArchivosEscenas/download/escena.json');
         //this.load.image('red', 'assets/particles/red.png');
     }
 
@@ -35,11 +35,11 @@ export class WorldScene extends Phaser.Scene {
      */
     async create(): Promise<void> {
 
-        var map=this.make.tilemap({key:'map'});
-        var tilesheet=map.addTilesetImage('tilesetincial','tiles');
+        //var map=this.make.tilemap({key:'map'});
+        //var tilesheet=map.addTilesetImage('tilesetincial','tiles');
         
-        var layer1 = map.createLayer('suelo',tilesheet);
-        var solid= map.createLayer('solid', tilesheet);
+        //var layer1 = map.createLayer('suelo',tilesheet);
+        //var solid= map.createLayer('solid', tilesheet);
 
 
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key

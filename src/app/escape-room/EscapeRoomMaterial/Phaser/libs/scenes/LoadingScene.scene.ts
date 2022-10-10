@@ -9,6 +9,8 @@ import { EscenaActiva } from './../../../../../clases/clasesParaJuegoDeEscapeRoo
 import { Skin } from './../../../../../clases/clasesParaJuegoDeEscapeRoom/Skin';
 import * as Phaser from 'phaser';
 import { PeticionesAPIService } from 'src/app/servicios'; 
+import { CommonModule } from '@angular/common';
+import { ModuleWithProviders, NgModule, NgZone, Optional, SkipSelf } from '@angular/core';
 
 import { ScrollManager } from '../utilities/scroll-manager';
 import { Pregunta } from 'src/app/clases/Pregunta';
@@ -27,7 +29,7 @@ export class LoadingScene extends Phaser.Scene {
         
     }
 
-    base
+    base;
     inscripcionAlumnoJuegoDeEscaperoom: AlumnoJuegoDeEscaperoom
     juegoSeleccionado: any;
     alumno: Alumno;
@@ -38,7 +40,7 @@ export class LoadingScene extends Phaser.Scene {
     Objetos:ObjetoEscaperoom[]=[];
     Skin: SkinActiva;
     SkinDatos: Skin;
-    Pregunta: Pregunta[]=[];
+    Preguntas: Pregunta[]=[];
     PreguntasActivas: PreguntaActiva[]=[];
 
     tiempo: number;
@@ -46,6 +48,8 @@ export class LoadingScene extends Phaser.Scene {
     puntos: number;
 
     getData(){
+        
+        console.log("lo estoy haciendo 1");
         this.juegoSeleccionado = this.sesion.DameJuego();
         this.alumno = this.sesion.DameAlumno();
         if (this.juegoSeleccionado.Modo === 'Individual') {
@@ -61,14 +65,71 @@ export class LoadingScene extends Phaser.Scene {
                 this.alumnos = alumnos;
             });
         });
-        //this.peticionesAPI.DameEscenasActivasEscaperoom(this.juegoSeleccionado.id)
-        //.subscribe (res=>{
+        this.peticionesAPI.DameEscenasActivasEscaperoom(this.juegoSeleccionado.id)
+        .subscribe (res=>{
+            
+            console.log("lo estoy haciendo2");
+            this.EscenasActivas=res;
+            var cont=0;
+            for(let b=0; b<this.EscenasActivas.length; b++){
+                let esc: EscenaEscaperoom[]=[];
+                esc= this.Escenas.filter(sc=> sc.id== this.EscenasActivas[b].escenaEscaperoomId);
+                if (!(esc.length>0) ){                    
+                    this.peticionesAPI.DameEscenasEscaperoom(this.EscenasActivas[b].escenaEscaperoomId)
+                    .subscribe(res=>{
+                        this.Escenas.push(res);
+                    })
+                }
+                this.peticionesAPI.DameObjetosActivosEscaperoom(this.EscenasActivas[b].id)
+                .subscribe(res=>{
+                    for(let c=0; c<res.length; c++){
+                        this.ObjetosActivos.push(res[c]);
+                        let obj: ObjetoEscaperoom[]=[];
+                        obj= this.Objetos.filter(obj=> obj.id== res[c].objetoEscaperoomId);
+                        if (!(obj.length>0) ){                    
+                            this.peticionesAPI.DameObjetosEscaperoom(res[c].objetoEscaperoomId)
+                            .subscribe(res=>{
+                                this.Objetos.push(res);
+                            })
+                        }
+                        this.peticionesAPI.DamePreguntasActivasEscaperoom(res[c].id)
+                        .subscribe(res=>{
+                            this.PreguntasActivas.push(res);
+                            let pr: Pregunta[]=[];
+                            pr= this.Preguntas.filter(pr=> pr.id== res.preguntaId);
+                            if (!(pr.length>0) ){                    
+                                this.peticionesAPI.DamePreguntas(res.preguntaId)
+                                .subscribe(res=>{
+                                    this.Preguntas.push(res);
+                                })
+                            }
+                        })
 
-        //})
+                    }
+                    this.sesion.TomaObjetos(this.Objetos);
+                })
+                cont=b;
+
+            }
+            if(cont==this.EscenasActivas.length){
+                
+            this.loadEscenas();
+            this.loadObjetos();
+            this.loadPreguntas();
+            this.sesion.TomaEscenas(this.Escenas);
+            this.sesion.TomaObjetosActivos(this.ObjetosActivos);
+            this.sesion.TomaPreguntas(this.Preguntas);
+            this.sesion.TomaPreguntasActivas(this.PreguntasActivas);
+            this.sesion.TomaObjetos(this.Objetos);
+            this.sesion.TomaEscenasActivas(res);
+            }
+
+        })
         }
     }
 
-    loadData(){
+    loadEscenas(){
+        
         this.load.setBaseURL('http://localhost:3000/api/imagenes');
         for (let i=0;i<this.EscenasActivas.length; i++){
             var key=(this.EscenasActivas[i].orden).toString();
@@ -77,27 +138,39 @@ export class LoadingScene extends Phaser.Scene {
             this.load.image(key+'tiles', '/ImagenesEscenas/download/'+image);
             this.load.tilemapTiledJSON(key+'map', '/ArchivosEscenas/download/escena.json'+archive);
         }
-        for (let b=0;b<this.ObjetosActivos.length; b++){
+    }
 
+    loadObjetos(){
+        
+        this.load.setBaseURL('http://localhost:3000/api/imagenes');
+        for (let b=0;b<this.ObjetosActivos.length; b++){
+            var image= this.Objetos.find(obj=>obj.id == this.ObjetosActivos[b].objetoEscaperoomId).Imagen;
+            this.load.image(this.ObjetosActivos[b].id+'obj','/ImagenesObjetos/download/'+image);
         }
 
     }
 
-    async preload(): Promise<void> {
+    loadPreguntas(){        
+        this.load.setBaseURL('http://localhost:3000/api/imagenes');
+
     }
 
-    /**
-     * * Load the blacksmith sprites
-     */
-    
+    loadSkins(){        
+        this.load.setBaseURL('http://localhost:3000/api/imagenes');
+    }
+
+
+    async preload(): Promise<void> {
+        this.getData();
+    }
 
     /**
      * * Phaser will only call create after all assets in Preload have been loaded
      */
     async create(): Promise<void> {
 
-        var map=this.make.tilemap({key:'map'});
-        var tilesheet=map.addTilesetImage('tilesetincial','tiles');
+        var map=this.make.tilemap({key:'1map'});
+        var tilesheet=map.addTilesetImage('tilesetincial','1tiles');
         
         var layer1 = map.createLayer('suelo',tilesheet);
         var solid= map.createLayer('solid', tilesheet);

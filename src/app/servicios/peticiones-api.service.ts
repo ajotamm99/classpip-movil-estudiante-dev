@@ -1,5 +1,6 @@
+import { ObjetoEscaperoom } from './../clases/clasesParaJuegoDeEscapeRoom/ObjetoEscaperoom';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject, of, ObservedValueOf } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ResponseContentType, Http} from '@angular/http';
 import {
@@ -27,6 +28,7 @@ import { EscenaActiva } from '../clases/clasesParaJuegoDeEscapeRoom/EscenaActiva
 import { ObjetoActivo } from '../clases/clasesParaJuegoDeEscapeRoom/ObjetoActivo';
 import { PreguntaActiva } from '../clases/clasesParaJuegoDeEscapeRoom/PreguntaActiva';
 import { AlumnoJuegoDeEscaperoom } from '../clases/clasesParaJuegoDeEscapeRoom/AlumnoJuegoDeEscaperoom';
+import { EscenaEscaperoom } from '../clases/clasesParaJuegoDeEscapeRoom/EscenaEscaperoom';
 
 @Injectable({
   providedIn: 'root'
@@ -1335,16 +1337,29 @@ public PonerNotaAlumnoJuegoDeGeocaching(alumnoJuegoDeGeocaching: AlumnoJuegoDeGe
 
   //juego de Escaperoom
 
-  public DameEscenasActivasEscaperoom(escenaActiva: EscenaActiva, id:number): Observable<EscenaActiva> {
-    return this.http.get<EscenaActiva>(this.APIURLJuegoDeEscaperoom + '/' + id  + '/escenaActivas');
+  public DameJuegoDeEscaperoomAlumno(alumnoId: number): Observable<Juego[]> {
+    return this.http.get<Juego[]>(this.APIUrlAlumnos + '/' + alumnoId + '/juegodeEscapeRooms');
+
+ }
+
+  public DameEscenasActivasEscaperoom(id:number): Observable<EscenaActiva[]> {
+    return this.http.get<EscenaActiva[]>(this.APIURLEscenasActivas + '?filter[where][juegoDeEscaperoomId]=' + id);
   }
 
-  public DameObjetoActivoEscaperoom(objetoActivo: ObjetoActivo, id: number): Observable<ObjetoActivo>{
-    return this.http.get<ObjetoActivo>(this.APIURLEscenasActivas+ '/' + id  + '/objetoActivos');
+  public DameEscenasEscaperoom(escenaId: number): Observable<EscenaEscaperoom>{
+    return this.http.get<EscenaEscaperoom>(this.APIURLEscenasEscaperoom + '/'+escenaId);
   }
 
-  public DamePreguntaActivaEscaperoom(preguntaAct: PreguntaActiva, id: number): Observable<PreguntaActiva>{
-    return this.http.get<PreguntaActiva>(this.APIUrlPreguntasActivas);
+  public DameObjetosActivosEscaperoom(escenaActivaId: number): Observable<ObjetoActivo[]>{
+    return this.http.get<ObjetoActivo[]>(this.APIUrlObjetosActivos+ '?filter[where][escenaActivaId]=' + escenaActivaId );
+  }
+
+  public DamePreguntasActivasEscaperoom(objetoActId): Observable<PreguntaActiva>{
+    return this.http.get<PreguntaActiva>(this.APIUrlPreguntasActivas+ '?filter[where][objetoActivoId]=' + objetoActId);
+  }
+
+  public DameObjetosEscaperoom(idObjeto: number): Observable<ObjetoEscaperoom>{
+    return this.http.get<ObjetoEscaperoom>(this.APIURLObjetosEscaperoom+'/'+idObjeto);
   }
 
   public DameInscripcionesAlumnoJuegoEscaperoom(juegoDeEscaperoomId: number): Observable<AlumnoJuegoDeEscaperoom[]> {
@@ -1362,5 +1377,7 @@ public PonerNotaAlumnoJuegoDeGeocaching(alumnoJuegoDeGeocaching: AlumnoJuegoDeGe
     return this.http.get<Alumno[]>(this.APIURLJuegoDeEscaperoom + '/' + idJuego + '/alumnos');
 
   }
+
+
   
 }
