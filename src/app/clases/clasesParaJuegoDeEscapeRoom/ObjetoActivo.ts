@@ -2,6 +2,7 @@ export class ObjetoActivo {
 
     id: number;
     objetoEscaperoomId: number;
+    juegoDeEscaperoomId: number;
     alumnoJuegoDeEscaperoomId: number;
     equipoJuegoDeEscaperoomId: number;
     escenaActivaId: number
@@ -15,7 +16,7 @@ export class ObjetoActivo {
     Lugar: string;
     RequisitoObjeto:boolean;
 
-    constructor(objetoEscaperoomId?: number, alumnoJuegoDeEscaperoomId?: number, equipoJuegoDeEscaperoomId?: number, RequisitoObjeto?:boolean) {
+    constructor(juegoDeEscaperoomId?:number, objetoEscaperoomId?: number, alumnoJuegoDeEscaperoomId?: number, equipoJuegoDeEscaperoomId?: number, RequisitoObjeto?:boolean) {
   
       this.objetoEscaperoomId = objetoEscaperoomId;
       this.alumnoJuegoDeEscaperoomId = alumnoJuegoDeEscaperoomId;
@@ -23,5 +24,6 @@ export class ObjetoActivo {
       this.Usado =false;
       this.EnMochila =false;
       this.RequisitoObjeto=RequisitoObjeto;
+      this.juegoDeEscaperoomId=juegoDeEscaperoomId;
     }
   }

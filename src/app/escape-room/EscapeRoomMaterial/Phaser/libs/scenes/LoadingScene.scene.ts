@@ -15,6 +15,7 @@ import { Component, Inject, ModuleWithProviders, NgModule, NgZone, Optional, Ski
 import { ScrollManager } from '../utilities/scroll-manager';
 import { Pregunta } from 'src/app/clases/Pregunta';
 import { Alumno } from 'src/app/clases';
+import { getMatAutocompleteMissingPanelError } from '@angular/material';
 
 
 export class LoadingScene extends Phaser.Scene{
@@ -25,16 +26,33 @@ export class LoadingScene extends Phaser.Scene{
           key: 'preloader'
         })
 
+        this.baseURL='http://localhost';
         this.idJuego=+localStorage.getItem('idJuego');
         this.idAlumno=+localStorage.getItem('idAlumno');
-        this.urlGetInscripcionAlumno='http://localhost:3000/api/alumnoescaperoom?filter[where][juegoDeEscaperoomId]='+this.idJuego+'&filter[where][alumnoId]='+this.idAlumno;    
+        this.urlGetInscripcionAlumno=this.baseURL + ':3000/api/alumnoescaperoom?filter[where][juegoDeEscaperoomId]='+this.idJuego+'&filter[where][alumnoId]='+this.idAlumno;    
+        this.urlGetEscenasActivas=this.baseURL + ':3000/api/escenaescaperoomactiva?filter[where][juegoDeEscaperoomId]=' + this.idJuego;
+        this.urlGetEscenas=this.baseURL + ':3000/api/escenasescaperoom/'
+        this.urlGetObjetosActivos=this.baseURL +':3000/api/objetoactivoescaperoom?filter[where][juegoDeEscaperoomId]=' + this.idJuego;
+        this.urlGetObjetos=this.baseURL +':3000/api/objetosescaperoom/'
+        this.urlGetPreguntasActivas=this.baseURL +':3000/api/preguntasactivas?filter[where][juegoDeEscaperoomId]=' + this.idJuego;
+        this.urlGetPreguntas=this.baseURL +':3000/api/Preguntas/'
+        this.urlGetSkin=this.baseURL +':3000/api/skins/';
     }
     //variables localstorage
     idAlumno: number;
     idJuego: number;
 
     //urls para los fetch
+    baseURL:string;
     urlGetInscripcionAlumno: string;
+    urlGetEscenasActivas: string;
+    urlGetEscenas: string;
+    urlGetObjetosActivos: string;
+    urlGetObjetos: string;
+    urlGetPreguntasActivas: string;
+    urlGetPreguntas: string;
+    urlGetSkin: string;
+
 
     //variables que pedimos mediante fetch
     inscripcionAlumnoJuegoDeEscaperoom: AlumnoJuegoDeEscaperoom;
@@ -54,10 +72,15 @@ export class LoadingScene extends Phaser.Scene{
     puntos: number;
 
     //variables escenas
-    map: Phaser.Tilemaps.Tilemap;
-    tilesheet: Phaser.Tilemaps.Tileset;
-    layer1: Phaser.Tilemaps.TilemapLayer;
-    solid: Phaser.Tilemaps.TilemapLayer;
+    maps: Phaser.Tilemaps.Tilemap[]=[];
+    mapSelected: Phaser.Tilemaps.Tilemap;
+    tilesheets: Phaser.Tilemaps.Tileset[]=[];
+    tilesheetSelected: Phaser.Tilemaps.Tileset;
+    layersActivas: Phaser.Tilemaps.TilemapLayer[]=[];
+    //layers: Phaser.Tilemaps.TilemapLayer[]=[];
+    //layerSelected: Phaser.Tilemaps.TilemapLayer;
+    //solid: Phaser.Tilemaps.TilemapLayer[]=[];
+    //solidSelected: Phaser.Tilemaps.TilemapLayer
   
     async getData(){
 
@@ -137,44 +160,7 @@ export class LoadingScene extends Phaser.Scene{
         })
         }*/
     }
-  
-    loadEscenas(){
-        
-        this.load.setBaseURL('http://localhost:3000/api/imagenes');
-        for (let i=0;i<this.EscenasActivas.length; i++){
-            var key=(this.EscenasActivas[i].orden).toString();
-            var image=this.Escenas.find(sc=>sc.id==this.EscenasActivas[i].escenaEscaperoomId).Tilesheet;
-            var archive = this.Escenas.find(sc=>sc.id==this.EscenasActivas[i].escenaEscaperoomId).Archivo;
-            this.load.image(key+'tiles', '/ImagenesEscenas/download/'+image);
-            this.load.tilemapTiledJSON(key+'map', '/ArchivosEscenas/download/'+archive);
-        }
-    }
-  
-    loadObjetos(){
-        
-        this.load.setBaseURL('http://localhost:3000/api/imagenes');
-        for (let b=0;b<this.ObjetosActivos.length; b++){
-            var image= this.Objetos.find(obj=>obj.id == this.ObjetosActivos[b].objetoEscaperoomId).Imagen;
-            this.load.image(this.ObjetosActivos[b].id+'obj','/ImagenesObjetos/download/'+image);
-        }
-  
-    }
-  
-    loadPreguntas(){        
-        this.load.setBaseURL('http://localhost:3000/api/imagenes');
-  
-    }
-  
-    loadSkins(){        
-        this.load.setBaseURL('http://localhost:3000/api/imagenes');
-    }
-  
-    init(){
-        var game=this;
-        //@ts-ignore
-        
 
-    }
   
     preload(){        
         //PROGRESS AT PRELOAD
@@ -211,29 +197,15 @@ export class LoadingScene extends Phaser.Scene{
         //percentText.setOrigin(0.5, 0.5);
 
         var game=this;
-        //@ts-ignore
+        //Si se quiere poner una imagen de fondo, al ser la primera que se carga será casi instantaneo 
+        //y permanecerá hasta que se carguen todos los recursos
+        //Se puede combinar con el progress bar
+        //La foto se puede cargar desde los assets del proyecto o haciendo una peticion fetch y cargandola instantaneamente
         /*this.load.image('fondo','./assets/prueba.jpeg').on("complete", ()=>{
-            this.add.image(0,0,"fondo").setOrigin(0).setDepth(0);
+            this.add.image(0,0,"fondo").setDepth(-1);
         });*/
 
-        //@ts-ignore
-        this.load.rexAwait(function(successCallback, failureCallback) { 
-            fetch('http://localhost:3000/api/escenasescaperoom/98', {method:'GET'})
-              .then(res=>
-                res.json())
-                .then(data=>
-                  {
-                    game.load.image('1tiles', 'http://localhost:3000/api/imagenes/ImagenesEscenas/download/'+data.Tilesheet)
-                    game.load.tilemapTiledJSON('1map', 'http://localhost:3000/api/imagenes/ArchivosEscenas/download/'+data.Archivo);;
-                    game.Escenas.push(data);
-                    console.log(data);    
-                    successCallback();
-                  }
-                );
-      
-            });
-        
-        
+
         //@ts-ignore
         this.load.rexAwait(function(successCallback, failureCallback) { 
             fetch(game.urlGetInscripcionAlumno, {method:'GET'})
@@ -247,8 +219,141 @@ export class LoadingScene extends Phaser.Scene{
                   }
                 );
       
-            });
+        });
         
+        //@ts-ignore
+        this.load.rexAwait(function(successCallback, failureCallback) { 
+            fetch(game.urlGetEscenasActivas, {method:'GET'})
+              .then(res=>
+                res.json())
+                .catch(err=>{
+                    failureCallback();
+                })
+                .then(data=>
+                  {
+                    game.EscenasActivas=data;
+                    console.log(game.EscenasActivas);
+                    var cont=0;
+                    for(let i=0; i<game.EscenasActivas.length;i++){
+                        if(!game.Escenas.some(sc=>sc.id==game.EscenasActivas[i].escenaEscaperoomId)){
+                            fetch(game.urlGetEscenas+game.EscenasActivas[i].escenaEscaperoomId, {method:'GET'})
+                            .then(res=>
+                            res.json())
+                            .catch(err=>{
+                                failureCallback();
+                            })
+                            .then(data=>{
+                                game.Escenas.push(data);
+                                var imagen= data.Tilesheet;
+                                var archivo= data.Archivo;
+                                game.load.image((cont+1)+'tiles', 'http://localhost:3000/api/imagenes/ImagenesEscenas/download/'+imagen)
+                                game.load.tilemapTiledJSON((cont+1)+'map', 'http://localhost:3000/api/imagenes/ArchivosEscenas/download/'+archivo);
+                                
+                                console.log(data);
+                                cont++;
+                                   
+                                if(cont==game.EscenasActivas.length){        
+                                    successCallback();
+                                }
+                            });
+                        }else{
+                            cont++;                               
+                            if(cont==game.EscenasActivas.length){        
+                                successCallback();
+                            }
+                        }                    
+                    }
+                  }
+                );
+        });
+
+        //@ts-ignore
+        this.load.rexAwait(function(successCallback, failureCallback) { 
+            fetch(game.urlGetObjetosActivos, {method:'GET'})
+                .then(res=>
+                res.json())
+                .catch(err=>{
+                    failureCallback();
+                })
+                .then(data=>
+                    {
+                    game.ObjetosActivos=data;
+                    console.log(game.ObjetosActivos);
+                    var cont=0;
+                    for(let i=0; i<game.ObjetosActivos.length;i++){
+                        if(!game.Objetos.some(obj=>obj.id==game.ObjetosActivos[i].objetoEscaperoomId)){
+                            fetch(game.urlGetObjetos+game.ObjetosActivos[i].objetoEscaperoomId, {method:'GET'})
+                            .then(res=>
+                            res.json())
+                            .catch(err=>{
+                                failureCallback();
+                            })
+                            .then(data=>{
+                                game.Objetos.push(data);
+                                var imagen= data.Imagen;
+                                game.load.image((cont+1)+'obj', 'http://localhost:3000/api/imagenes/ImagenesObjetos/download/'+imagen)
+                               
+                                console.log(data);
+                                cont++;
+                                    
+                                if(cont==game.ObjetosActivos.length){        
+                                    successCallback();
+                                }
+                            });
+                        }else{
+                            cont++;                               
+                            if(cont==game.ObjetosActivos.length){        
+                                successCallback();
+                            }
+                        }                    
+                    }
+                    }
+                );
+        });
+
+        //@ts-ignore
+        this.load.rexAwait(function(successCallback, failureCallback) { 
+            fetch(game.urlGetPreguntasActivas, {method:'GET'})
+              .then(res=>
+                res.json())
+                .catch(err=>{
+                    failureCallback();
+                })
+                .then(data=>
+                  {
+                    game.PreguntasActivas=data;
+                    console.log(game.PreguntasActivas);
+                    var cont=0;
+                    for(let i=0; i<game.PreguntasActivas.length;i++){
+                        if(!game.Preguntas.some(preg=>preg.id==game.PreguntasActivas[i].preguntaId)){
+                            fetch(game.urlGetPreguntas+game.PreguntasActivas[i].preguntaId, {method:'GET'})
+                            .then(res=>
+                            res.json())
+                            .catch(err=>{
+                                failureCallback();
+                            })
+                            .then(data=>{
+                                game.Preguntas.push(data);
+                                var imagen= data.Imagen;
+                                game.load.image((cont+1)+'preg', 'http://localhost:3000/api/imagenes/ImagenesPreguntas/download/'+imagen)
+                                
+                                console.log(data);
+                                cont++;
+                                   
+                                if(cont==game.PreguntasActivas.length){        
+                                    successCallback();
+                                }
+                            });
+                        }else{
+                            cont++;                               
+                            if(cont==game.PreguntasActivas.length){        
+                                successCallback();
+                            }
+                        }                    
+                    }
+                  }
+                );
+        });
 
 
         this.load.on("progress", (percent)=>{
@@ -289,15 +394,15 @@ export class LoadingScene extends Phaser.Scene{
      */
     create() {
         
-      console.log('estoy en create');
-      console.log(this.Escenas);
-      this.map =this.make.tilemap({key:'1map'});
-      this.tilesheet=this.map.addTilesetImage('tilesetincial','1tiles');
+        console.log('estoy en create');
+        console.log(this.Escenas);
+        this.maps.push(this.make.tilemap({key:'1map'}));
+        this.tilesheets.push(this.maps[0].addTilesetImage('tilesetincial','1tiles'));
         
-      this.layer1= this.map.createLayer('suelo',this.tilesheet);
-      this.layer1.setOrigin(0.5,0.5);
-      this.solid= this.map.createLayer('solid', this.tilesheet).setOrigin(0.5,0.5);
-      this.solid.setOrigin(0.5,0.5);
+        this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0]));
+        //t.setOrigin(0.5,0.5);
+        this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0]));
+        //solid.setOrigin(0.5,0.5);   
   
     }
   
@@ -308,7 +413,10 @@ export class LoadingScene extends Phaser.Scene{
     
         this.cameras.resize(width, height);
     
-        this.layer1.setSize(width, height);
-        this.solid.setSize(width, height);
+        for(let i=0; i<this.layersActivas.length; i++){
+            this.layersActivas[i].setSize(width, height);
+        }
+        //this.layer1.setSize(width, height);
+        //this.solid.setSize(width, height);
     }
   }
