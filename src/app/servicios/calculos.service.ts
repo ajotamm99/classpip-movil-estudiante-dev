@@ -730,13 +730,16 @@ export class CalculosService {
           console.log ('No hay juegos de cuestionario en equipo');
         }
 
-        console.log('* voy a por los juegos de escaperoom del alumno');
+        console.log('voy a por los juegos de escaperoom del alumno');
       try {
         lista = await this.peticionesAPI.DameJuegoDeEscaperoomAlumno(AlumnoId).toPromise();
+        console.log("funciona la peti");
         for (let i = 0; i < (lista.length); i++) {
           if (lista[i].JuegoActivo === true) {
+            console.log("esta act");
             JuegosActivos.push(lista[i]);
           } else {
+            console.log("no está act");
             JuegosInactivos.push(lista[i]);
           }
         }

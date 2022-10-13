@@ -17,7 +17,7 @@ import {EquipoJuegoDeEvaluacion} from '../clases/EquipoJuegoDeEvaluacion';
 })
 export class SesionService {
 
-
+  txt:string;
   alumno: Alumno;
   alumnoObservable = new ReplaySubject(1);
   profesor: Profesor;
@@ -620,7 +620,13 @@ export class SesionService {
   public DameEscenasActivas(){
     return this.EscenasActivas;
   }
+  public TomaText(str: string){
+    this.txt=str;
+  }
 
+  public DameText(){
+    return this.txt;
+  }
 }
 
 

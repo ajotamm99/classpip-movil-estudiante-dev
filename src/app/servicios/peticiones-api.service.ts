@@ -1,3 +1,4 @@
+import { JuegoDeEscapeRoom } from './../clases/clasesParaJuegoDeEscapeRoom/JuegoDeEscaperoom';
 import { ObjetoEscaperoom } from './../clases/clasesParaJuegoDeEscapeRoom/ObjetoEscaperoom';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, of, ObservedValueOf } from 'rxjs';
@@ -1337,8 +1338,8 @@ public PonerNotaAlumnoJuegoDeGeocaching(alumnoJuegoDeGeocaching: AlumnoJuegoDeGe
 
   //juego de Escaperoom
 
-  public DameJuegoDeEscaperoomAlumno(alumnoId: number): Observable<Juego[]> {
-    return this.http.get<Juego[]>(this.APIUrlAlumnos + '/' + alumnoId + '/juegodeEscapeRooms');
+  public DameJuegoDeEscaperoomAlumno(alumnoId: number): Observable<JuegoDeEscapeRoom[]> {
+    return this.http.get<JuegoDeEscapeRoom[]>(this.APIUrlAlumnos + '/' + alumnoId + '/juegodeEscapeRooms');
 
  }
 
@@ -1369,7 +1370,7 @@ public PonerNotaAlumnoJuegoDeGeocaching(alumnoJuegoDeGeocaching: AlumnoJuegoDeGe
 
      // Da la inscripción de un alumno concreto
   public DameInscripcionAlumnoJuegoDeEscaperoom(juegoId: number, alumnoId: number): Observable<AlumnoJuegoDeEscaperoom[]> {
-      return this.http.get<AlumnoJuegoDeEscaperoom[]>(this.APIUrlAlumnoJuegoDeVotacionTodosAUno
+      return this.http.get<AlumnoJuegoDeEscaperoom[]>(this.APIUrlAlumnoJuegoDeEscaperoom
       + '?filter[where][juegoDeEscaperoomId]=' + juegoId +  '&filter[where][alumnoId]=' + alumnoId);
   }
 

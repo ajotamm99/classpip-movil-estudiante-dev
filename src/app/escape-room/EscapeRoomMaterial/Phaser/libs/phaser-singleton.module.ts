@@ -1,3 +1,4 @@
+import { SesionService } from './../../../../servicios/sesion.service';
 import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule, NgZone, Optional, SkipSelf } from '@angular/core';
 //import { SwordTypeEnum } from '@company-name/shared/data-access-model';
@@ -5,13 +6,20 @@ import * as Phaser from 'phaser';
 import { Subject } from 'rxjs';
 import { WorldScene } from './scenes/world.scene';
 import { LoadingScene } from './scenes/LoadingScene.scene'
+import { PeticionesAPIService } from 'src/app/servicios';
+//import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Alumno } from 'src/app/clases';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 
 /**
  * * The PhaserInstance is a singleton that controls the Game Scene, which is the UI portion of the Game Engine
  */
 
 @NgModule({
-    imports: [CommonModule],
+    imports: [CommonModule
+      ],
     declarations: [],
     exports: [],
 })
@@ -20,9 +28,11 @@ export class PhaserSingletonService {
     public static activeGame: Phaser.Game;
     private static ngZone: NgZone;
     public static actionsHistory: string[] = []; // * Since phaser is a singleton, let's store the history of actions here for all components.
+    
     //public static shopObservable: Subject<SwordTypeEnum> = new Subject<SwordTypeEnum>();
 
-    constructor(private ngZone: NgZone, @Optional() @SkipSelf() parentModule?: PhaserSingletonService) {
+    constructor(
+        private ngZone: NgZone, @Optional() @SkipSelf() parentModule?: PhaserSingletonService) {
         if (parentModule) {
             console.error('Phaser Singleton is already loaded. Import it in the AppModule only');
         } else {
@@ -63,7 +73,7 @@ export class PhaserSingletonService {
      * ! GameInstance must be the parent class to scenes.
      * ! Should only be called *when* we want it to load in memory.  I.e. during simulation.
      */
-    public static async init(): Promise<void> {
+    public async init(): Promise<void> {
         
         /**
          * * Phaser by default runs at 60 FPS, and each frame that triggers change detection in Angular which causes
@@ -71,9 +81,11 @@ export class PhaserSingletonService {
          * * https://angular.io/guide/zone
          */
         console.log("running singleton");
+        var alumnos: any;
         /*PhaserSingletonService.ngZone.runOutsideAngular(() => {*/
-
-            
+        localStorage.setItem('1map','http://localhost:3000/api/imagenes/ArchivosEscenas/download/escena.json')
+        localStorage.setItem('1tiles','http://localhost:3000/api/imagenes/ImagenesEscenas/download/mainlevbuild.png')
+        
 
             if (!PhaserSingletonService.activeGame) {
                 // To scale game to always fit in parent container

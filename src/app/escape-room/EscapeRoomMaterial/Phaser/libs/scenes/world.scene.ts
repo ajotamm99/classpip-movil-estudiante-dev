@@ -1,16 +1,17 @@
+import { SesionService } from './../../../../../servicios/sesion.service';
 //import { Blacksmith, CheapSword, FancySword, Sword } from '@company-name/shared/data-access-model';
 import * as Phaser from 'phaser';
 
 import { ScrollManager } from '../utilities/scroll-manager';
+import { PeticionesAPIService } from 'src/app/servicios';
 
 export class WorldScene extends Phaser.Scene {
     private backgroundKey = 'background-image'; // * Store the background image name
     private backgroundImageAsset = '/assets/prueba.jpeg'; // * Asset url relative to the app itself
     private backgroundImage: Phaser.GameObjects.Image; // * Reference for the background image
-    private scrollManager: ScrollManager; // * Custom openforge utility for handling scroll
     
 
-    constructor() {
+    constructor(private sesion: SesionService, private peticionesApi: PeticionesAPIService) {
         super({ key: 'main' });
     }
 
@@ -34,6 +35,7 @@ export class WorldScene extends Phaser.Scene {
      * * Phaser will only call create after all assets in Preload have been loaded
      */
     async create(): Promise<void> {
+        this.scene.start()
 
         //var map=this.make.tilemap({key:'map'});
         //var tilesheet=map.addTilesetImage('tilesetincial','tiles');
@@ -80,13 +82,5 @@ export class WorldScene extends Phaser.Scene {
         // emitter.startFollow(logo);
     }
 
-    /**
-     * * When the screen is resized, we
-     *
-     * @param gameSize
-     */
-    resize(gameSize: Phaser.Structs.Size): void {
-        console.log('Resizing', gameSize.width, gameSize.height);
-        this.cameras.resize(gameSize.width, gameSize.height);
-    }
+
 }

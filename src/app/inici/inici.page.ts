@@ -74,7 +74,7 @@ export class IniciPage implements OnInit {
     }, (err) => {
       console.log(err); 
     });
-
+    console.log(juego)
     this.sesion.TomaJuego(juego);
     if (juego.Tipo === 'Juego De Puntos') {
       this.navCtrl.navigateForward('/juego-puntos');
@@ -105,6 +105,8 @@ export class IniciPage implements OnInit {
     } else if (juego.Tipo === 'Control de trabajo en equipo') {
       this.navCtrl.navigateForward('/juego-de-control-de-trabajo-en-equipo');
     } else if (juego.Tipo === 'Juego De Escaperoom'){
+      localStorage.setItem('idJuego', (juego.id).toString());
+      localStorage.setItem('idAlumno', (this.sesion.DameAlumno().id).toString());
       this.navCtrl.navigateForward('/escape-room');
     } else{
       this.navCtrl.navigateForward('/juego-colleccion');

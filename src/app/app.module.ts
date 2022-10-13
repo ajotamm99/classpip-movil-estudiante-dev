@@ -50,6 +50,8 @@ import { WheelSelector } from '@ionic-native/wheel-selector/ngx';
 import { DateAdapter } from '@angular/material';
 import { CustomDateAdapter } from './customDataAdapter';
 import {DatePipe} from '@angular/common';
+import { PhaserSingletonService } from './escape-room/EscapeRoomMaterial/Phaser/libs/phaser-singleton.module';
+import { EscapeRoomPageModule } from './escape-room/escape-room.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -69,6 +71,8 @@ import {DatePipe} from '@angular/common';
     BrowserAnimationsModule,
     LongPressModule,
     SocketIoModule.forRoot(config),
+    //PhaserSingletonService.forRoot(),
+    EscapeRoomPageModule,
     IntercambiarCromosPageModule,
     AvatarEditorPageModule
   ],
