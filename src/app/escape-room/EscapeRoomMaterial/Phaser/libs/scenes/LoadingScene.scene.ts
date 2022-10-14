@@ -16,9 +16,11 @@ import { ScrollManager } from '../utilities/scroll-manager';
 import { Pregunta } from 'src/app/clases/Pregunta';
 import { Alumno } from 'src/app/clases';
 import { getMatAutocompleteMissingPanelError } from '@angular/material';
+import { EscapeRoomPageModule } from 'src/app/escape-room/escape-room.module';
 
 
 export class LoadingScene extends Phaser.Scene{
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
 
     constructor() {
@@ -26,9 +28,12 @@ export class LoadingScene extends Phaser.Scene{
           key: 'preloader'
         })
 
+        //Cuando la creamos construimos las URL y sacamos los ids
+
         this.baseURL='http://localhost';
         this.idJuego=+localStorage.getItem('idJuego');
         this.idAlumno=+localStorage.getItem('idAlumno');
+        //localStorage.clear();
         this.urlGetInscripcionAlumno=this.baseURL + ':3000/api/alumnoescaperoom?filter[where][juegoDeEscaperoomId]='+this.idJuego+'&filter[where][alumnoId]='+this.idAlumno;    
         this.urlGetEscenasActivas=this.baseURL + ':3000/api/escenaescaperoomactiva?filter[where][juegoDeEscaperoomId]=' + this.idJuego;
         this.urlGetEscenas=this.baseURL + ':3000/api/escenasescaperoom/'
@@ -36,7 +41,7 @@ export class LoadingScene extends Phaser.Scene{
         this.urlGetObjetos=this.baseURL +':3000/api/objetosescaperoom/'
         this.urlGetPreguntasActivas=this.baseURL +':3000/api/preguntasactivas?filter[where][juegoDeEscaperoomId]=' + this.idJuego;
         this.urlGetPreguntas=this.baseURL +':3000/api/Preguntas/'
-        this.urlGetSkin=this.baseURL +':3000/api/skins/';
+        this.urlGetSkin=this.baseURL +':3000/api/skins/22';
     }
     //variables localstorage
     idAlumno: number;
@@ -76,91 +81,8 @@ export class LoadingScene extends Phaser.Scene{
     mapSelected: Phaser.Tilemaps.Tilemap;
     tilesheets: Phaser.Tilemaps.Tileset[]=[];
     tilesheetSelected: Phaser.Tilemaps.Tileset;
-    layersActivas: Phaser.Tilemaps.TilemapLayer[]=[];
-    //layers: Phaser.Tilemaps.TilemapLayer[]=[];
-    //layerSelected: Phaser.Tilemaps.TilemapLayer;
-    //solid: Phaser.Tilemaps.TilemapLayer[]=[];
-    //solidSelected: Phaser.Tilemaps.TilemapLayer
-  
-    async getData(){
-
-        /*
-        if (this.juegoSeleccionado.Modo === 'Individual') {
-        // Traigo la inscripción del alumno
-        this.peticionesAPI.DameInscripcionAlumnoJuegoDeEscaperoom(this.juegoSeleccionado.id, this.alumno.id)
-        .subscribe (inscripcion => {
-            this.inscripcionAlumnoJuegoDeEscaperoom = inscripcion[0];
-            console.log ('ya tengo la inscripcion');
-            console.log (this.inscripcionAlumnoJuegoDeEscaperoom);
-            // traigo los alumnos del juego
-            this.peticionesAPI.DameAlumnosjuegoDeEscaperoom(this.juegoSeleccionado.id)
-            .subscribe (alumnos => {
-                this.alumnos = alumnos;
-            });
-        });
-        this.peticionesAPI.DameEscenasActivasEscaperoom(this.juegoSeleccionado.id)
-        .subscribe (res=>{
-            
-            console.log("lo estoy haciendo2");
-            this.EscenasActivas=res;
-            var cont=0;
-            for(let b=0; b<this.EscenasActivas.length; b++){
-                let esc: EscenaEscaperoom[]=[];
-                esc= this.Escenas.filter(sc=> sc.id== this.EscenasActivas[b].escenaEscaperoomId);
-                if (!(esc.length>0) ){                    
-                    this.peticionesAPI.DameEscenasEscaperoom(this.EscenasActivas[b].escenaEscaperoomId)
-                    .subscribe(res=>{
-                        this.Escenas.push(res);
-                    })
-                }
-                this.peticionesAPI.DameObjetosActivosEscaperoom(this.EscenasActivas[b].id)
-                .subscribe(res=>{
-                    for(let c=0; c<res.length; c++){
-                        this.ObjetosActivos.push(res[c]);
-                        let obj: ObjetoEscaperoom[]=[];
-                        obj= this.Objetos.filter(obj=> obj.id== res[c].objetoEscaperoomId);
-                        if (!(obj.length>0) ){                    
-                            this.peticionesAPI.DameObjetosEscaperoom(res[c].objetoEscaperoomId)
-                            .subscribe(res=>{
-                                this.Objetos.push(res);
-                            })
-                        }
-                        this.peticionesAPI.DamePreguntasActivasEscaperoom(res[c].id)
-                        .subscribe(res=>{
-                            this.PreguntasActivas.push(res);
-                            let pr: Pregunta[]=[];
-                            pr= this.Preguntas.filter(pr=> pr.id== res.preguntaId);
-                            if (!(pr.length>0) ){                    
-                                this.peticionesAPI.DamePreguntas(res.preguntaId)
-                                .subscribe(res=>{
-                                    this.Preguntas.push(res);
-                                })
-                            }
-                        })
-  
-                    }
-                    this.sesion.TomaObjetos(this.Objetos);
-                })
-                cont=b;
-  
-            }
-            if(cont==this.EscenasActivas.length){
-                
-            this.loadEscenas();
-            this.loadObjetos();
-            this.loadPreguntas();
-            this.sesion.TomaEscenas(this.Escenas);
-            this.sesion.TomaObjetosActivos(this.ObjetosActivos);
-            this.sesion.TomaPreguntas(this.Preguntas);
-            this.sesion.TomaPreguntasActivas(this.PreguntasActivas);
-            this.sesion.TomaObjetos(this.Objetos);
-            this.sesion.TomaEscenasActivas(res);
-            }
-  
-        })
-        }*/
-    }
-
+    layersActivas: Phaser.Tilemaps.TilemapLayer[]=[];    
+    player: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   
     preload(){        
         //PROGRESS AT PRELOAD
@@ -197,6 +119,7 @@ export class LoadingScene extends Phaser.Scene{
         //percentText.setOrigin(0.5, 0.5);
 
         var game=this;
+
         //Si se quiere poner una imagen de fondo, al ser la primera que se carga será casi instantaneo 
         //y permanecerá hasta que se carguen todos los recursos
         //Se puede combinar con el progress bar
@@ -205,7 +128,7 @@ export class LoadingScene extends Phaser.Scene{
             this.add.image(0,0,"fondo").setDepth(-1);
         });*/
 
-
+        //RECOGEMOS INSCRIPCION
         //@ts-ignore
         this.load.rexAwait(function(successCallback, failureCallback) { 
             fetch(game.urlGetInscripcionAlumno, {method:'GET'})
@@ -221,6 +144,7 @@ export class LoadingScene extends Phaser.Scene{
       
         });
         
+        //RECOGEMOS ESCENAS
         //@ts-ignore
         this.load.rexAwait(function(successCallback, failureCallback) { 
             fetch(game.urlGetEscenasActivas, {method:'GET'})
@@ -267,6 +191,7 @@ export class LoadingScene extends Phaser.Scene{
                 );
         });
 
+        //RECOGEMOS OBJETOS
         //@ts-ignore
         this.load.rexAwait(function(successCallback, failureCallback) { 
             fetch(game.urlGetObjetosActivos, {method:'GET'})
@@ -311,6 +236,7 @@ export class LoadingScene extends Phaser.Scene{
                 );
         });
 
+        //RECOGEMOS PREGUNTAS
         //@ts-ignore
         this.load.rexAwait(function(successCallback, failureCallback) { 
             fetch(game.urlGetPreguntasActivas, {method:'GET'})
@@ -355,6 +281,34 @@ export class LoadingScene extends Phaser.Scene{
                 );
         });
 
+        //RECOGEMOS SKINS
+        //De momento solo tenemos una Skin, pero se podría añadir una escena previa a esta y común 
+        //a las demás combinaciones de modos en la que se muestre al jugador que skin quiere dependiendo
+        //del historial de puntos que tenga. Se puede utilizar un plugin de diálogos de RexRainbow.
+        //poniendo en transparente las no disponibles. Una vez seleccionada se pasa al registry de PHaser 
+        //para ser accedido por la escena principal y la cargamos en create. 
+        //@ts-ignore
+        this.load.rexAwait(function(successCallback, failureCallback) { 
+            fetch(game.urlGetSkin, {method:'GET'})
+              .then(res=>
+                res.json())
+                .catch(err=>{
+                    failureCallback();
+                })
+                .then(data=>
+                  {
+                    game.SkinDatos=data;
+                    var imagen= data.Spritesheet;
+                    //var Archivo = data.Archivo;
+                    game.load.image('1skinimg', 'http://localhost:3000/api/imagenes/ImagenesSkins/download/'+imagen)
+                    //game.load.('1skinimg', 'http://localhost:3000/api/imagenes/ImagenesSkins/download/'+imagen)
+                                
+                    console.log(game.SkinDatos);
+                    successCallback();
+                  }
+                );
+        });
+
 
         this.load.on("progress", (percent)=>{
             progressBar.clear();
@@ -371,39 +325,64 @@ export class LoadingScene extends Phaser.Scene{
         });
   
   
-          //this.load.image('1tiles', 'http://localhost:3000/api/imagenes/ImagenesEscenas/download/'+this.Escenas[0].Tilesheet)
-          //this.load.tilemapTiledJSON('1map', 'http://localhost:3000/api/imagenes/ArchivosEscenas/download/'+this.Escenas[0].Archivo).on('filecomplete', function(){this.make.tilemap({key:'1map'});});;
-  
-          //var map=this.make.tilemap({key:'1map'});
-          //var tilesheet=map.addTilesetImage('tilesetincial','1tiles');
-        
-          //var layer1 = map.createLayer('suelo',tilesheet);
-          //var solid= map.createLayer('solid', tilesheet);
-  
-        //this.load.rexAwait
-        
-        
-        //console.log(localStorage.getItem('1map').toString());
-            //this.load.image('1tiles', localStorage.getItem('1tiles').toString());
-            //this.load.tilemapTiledJSON('1map', localStorage.getItem('1map').toString());
-  
     }
   
     /**
      * * Phaser will only call create after all assets in Preload have been loaded
      */
     create() {
+
+        
+
+        this.cursors = this.input.keyboard.createCursorKeys();
         
         console.log('estoy en create');
         console.log(this.Escenas);
         this.maps.push(this.make.tilemap({key:'1map'}));
         this.tilesheets.push(this.maps[0].addTilesetImage('tilesetincial','1tiles'));
         
-        this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0]));
+        this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0]).setDepth(0));
         //t.setOrigin(0.5,0.5);
-        this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0]));
-        //solid.setOrigin(0.5,0.5);   
+        this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0]).setDepth(2));
+        //solid.setOrigin(0.5,0.5);  
+        this.layersActivas[1].setCollisionByProperty({collides: true})
+
+        //@ts-ignore
+        this.cameras.main.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
+        //@ts-ignore
+        this.physics.world.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
+
+
+        //@ts-ignore
+        this.player= this.physics.add.image(this.game.config.width/2 + 150, this.game.config.height/2,'1skinimg');
+        this.player.setScale(0.1);
+        this.player.setCollideWorldBounds(true);
+        this.player.setDepth(1);
+        this.physics.add.collider(this.player, this.layersActivas[1]);
+        this.cameras.main.startFollow(this.player, true, 0.4, 0.4);
   
+    }
+
+    update(time: number, delta: number): void {
+        this.player.setVelocity(0);
+
+        if (this.cursors.left.isDown)
+        {
+            this.player.setVelocityX(-500);
+        }
+        else if (this.cursors.right.isDown)
+        {
+            this.player.setVelocityX(500);
+        }
+
+        if (this.cursors.up.isDown)
+        {
+            this.player.setVelocityY(-500);
+        }
+        else if (this.cursors.down.isDown)
+        {
+            this.player.setVelocityY(500);
+        }
     }
   
     resize (gameSize, baseSize, displaySize, resolution)

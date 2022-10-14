@@ -45,11 +45,9 @@ export class EscapeRoomPage implements OnInit,OnDestroy {
         },
         parent: 'phaser-example',
         physics: {
-            default: 'arcade',
-            arcade: {
-                gravity: { y: 200 }
-            }
-        },plugins: {
+          default: 'arcade',
+        },
+        plugins: {
           global: [{
               key: 'rexAwaitLoader',
               plugin: AwaitLoaderPlugin,
