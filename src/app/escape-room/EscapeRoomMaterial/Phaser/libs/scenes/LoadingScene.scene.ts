@@ -43,6 +43,10 @@ export class LoadingScene extends Phaser.Scene{
         this.urlGetPreguntas=this.baseURL +':3000/api/Preguntas/'
         this.urlGetSkin=this.baseURL +':3000/api/skins/22';
     }
+    //variables pantalla
+    widthWindow: number;
+    HeightWindow: number;
+
     //variables localstorage
     idAlumno: number;
     idJuego: number;
@@ -83,17 +87,20 @@ export class LoadingScene extends Phaser.Scene{
     tilesheetSelected: Phaser.Tilemaps.Tileset;
     layersActivas: Phaser.Tilemaps.TilemapLayer[]=[];    
     player: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  
+    image: Phaser.GameObjects.Image;
+
+
     preload(){ 
-        
         //RESPONSIVE PRELOAD
         //La barra de carga se ajustará al tamaño de la pestaña
         //Si se quiere hacer que sea reactiva al cambio durante la carga, 
         //añadir las variables en la función resize   
         //@ts-ignore
-        var width: number = this.game.config.width;        
+        var width: number = this.game.config.width;
+        this.widthWindow=width;        
         //@ts-ignore
         var height: number= this.game.config.height;
+        this.HeightWindow= height;
 
         var heightbar=0.10*height;
         var widthbar=0.25*width;
@@ -131,10 +138,12 @@ export class LoadingScene extends Phaser.Scene{
         //Si se quiere poner una imagen de fondo, al ser la primera que se carga será casi instantaneo 
         //y permanecerá hasta que se carguen todos los recursos
         //Se puede combinar con el progress bar
-        //La foto se puede cargar desde los assets del proyecto o haciendo una peticion fetch y cargandola instantaneamente
-        /*this.load.image('fondo','./assets/prueba.jpeg').on("complete", ()=>{
-            this.add.image(0,0,"fondo").setDepth(-1);
-        });*/
+        //La foto se puede cargar desde los assets del proyecto o haciendo una peticion fetch y cargandola instantaneamente,
+        //
+        //this.game.scene.getScenes
+        
+        this.image= this.add.image(0.5*width,0.1*height,"fondo").setOrigin(0.5,0).setDepth(3);
+
 
         //RECOGEMOS INSCRIPCION
         //@ts-ignore
@@ -330,8 +339,6 @@ export class LoadingScene extends Phaser.Scene{
             progressBox.destroy();
             percentText.destroy();
         });
-  
-  
     }
   
     /**
@@ -339,8 +346,7 @@ export class LoadingScene extends Phaser.Scene{
      */
     create() {
 
-        
-
+        this.image.destroy();
         this.cursors = this.input.keyboard.createCursorKeys();
         
         console.log('estoy en create');
@@ -348,24 +354,29 @@ export class LoadingScene extends Phaser.Scene{
         this.maps.push(this.make.tilemap({key:'1map'}));
         this.tilesheets.push(this.maps[0].addTilesetImage('tilesetincial','1tiles'));
         
-        this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0]).setDepth(0));
+        this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0],0,0).setDepth(0).setOrigin(0,0));
+        this.layersActivas[0].setX(((this.widthWindow-this.layersActivas[0].width)/2));
         //t.setOrigin(0.5,0.5);
-        this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0]).setDepth(2));
+        this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0],0,0).setDepth(2).setOrigin(0,0));
+        this.layersActivas[1].setX(((this.widthWindow-this.layersActivas[1].width)/2));
         //solid.setOrigin(0.5,0.5);  
         this.layersActivas[1].setCollisionByProperty({collides: true})
 
         //@ts-ignore
         this.cameras.main.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
-        //this.cameras.main.setSize(this.layersActivas[0].width/4);
         //@ts-ignore
         this.physics.world.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
 
 
         //@ts-ignore
         this.player= this.physics.add.image(this.game.config.width/2 + 150, this.game.config.height/2,'1skinimg');
+        //En este caso lo escalo manualmente, hay que fijarse al subir las skins de que 
+        //tienen que ser de un tamaño similar a los tiles de la escena
         this.player.setScale(0.1);
         this.player.setCollideWorldBounds(true);
         this.player.setDepth(1);
+
+        //si queremos modificar el collidebox del sprite
         //this.player.body.setSize(this.player.width, this.player.height/2, false);
         this.physics.add.collider(this.player, this.layersActivas[1]);
         this.cameras.main.startFollow(this.player, true, 0.4, 0.4);

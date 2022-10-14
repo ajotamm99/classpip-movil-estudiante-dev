@@ -4,7 +4,7 @@ import { PhaserSingletonService } from './EscapeRoomMaterial/Phaser/libs/phaser-
 import { Component, OnInit, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { PeticionesAPIService } from '../servicios';
 import Phaser from 'phaser';
-import { WorldScene } from './EscapeRoomMaterial/Phaser/libs/scenes/world.scene';
+import { BootScene } from './EscapeRoomMaterial/Phaser/libs/scenes/boot.scene';
 import { Location } from '@angular/common';
 import { Alumno, Pregunta, TablaHistorialPuntosAlumno } from '../clases';
 import { AlumnoJuegoDeEscaperoom } from '../clases/clasesParaJuegoDeEscapeRoom/AlumnoJuegoDeEscaperoom';
@@ -47,6 +47,7 @@ export class EscapeRoomPage implements OnInit,OnDestroy {
         physics: {
           default: 'arcade',
         },
+        backgroundColor: "#add8e6",
         plugins: {
           global: [{
               key: 'rexAwaitLoader',
@@ -54,7 +55,7 @@ export class EscapeRoomPage implements OnInit,OnDestroy {
               start: true
           },
         ]},
-        scene: [LoadingScene],
+        scene: [BootScene,LoadingScene],
         render: {
             transparent: false,
             pixelArt: true,

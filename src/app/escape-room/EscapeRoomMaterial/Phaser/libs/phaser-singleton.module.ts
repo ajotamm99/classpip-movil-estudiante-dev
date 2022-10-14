@@ -4,7 +4,6 @@ import { ModuleWithProviders, NgModule, NgZone, Optional, SkipSelf } from '@angu
 //import { SwordTypeEnum } from '@company-name/shared/data-access-model';
 import * as Phaser from 'phaser';
 import { Subject } from 'rxjs';
-import { WorldScene } from './scenes/world.scene';
 import { LoadingScene } from './scenes/LoadingScene.scene'
 import { PeticionesAPIService } from 'src/app/servicios';
 //import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -12,6 +11,7 @@ import { Alumno } from 'src/app/clases';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { BootScene } from './scenes/boot.scene';
 
 /**
  * * The PhaserInstance is a singleton that controls the Game Scene, which is the UI portion of the Game Engine
@@ -81,12 +81,7 @@ export class PhaserSingletonService {
          * * https://angular.io/guide/zone
          */
         console.log("running singleton");
-        var alumnos: any;
-        /*PhaserSingletonService.ngZone.runOutsideAngular(() => {*/
-        localStorage.setItem('1map','http://localhost:3000/api/imagenes/ArchivosEscenas/download/escena.json')
-        localStorage.setItem('1tiles','http://localhost:3000/api/imagenes/ImagenesEscenas/download/mainlevbuild.png')
         
-
             if (!PhaserSingletonService.activeGame) {
                 // To scale game to always fit in parent container
                 // https://photonstorm.github.io/phaser3-docs/Phaser.Scale.ScaleManager.html
@@ -102,14 +97,14 @@ export class PhaserSingletonService {
                     physics: {
                         default: 'arcade',
                         arcade: {
-                            gravity: { y: 200 }
                         }
                     },
-                    scene: [LoadingScene, WorldScene],
+                    scene: [BootScene, LoadingScene],
                     render: {
                         transparent: false,
                         pixelArt: true,
                     },
+                    backgroundColor: 'blue'
                     /*type: Phaser.AUTO,
                     scale: {
                         mode: Phaser.Scale.RESIZE,
