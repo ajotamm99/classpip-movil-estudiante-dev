@@ -84,38 +84,46 @@ export class LoadingScene extends Phaser.Scene{
     layersActivas: Phaser.Tilemaps.TilemapLayer[]=[];    
     player: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   
-    preload(){        
-        //PROGRESS AT PRELOAD
-        var progressBar = this.add.graphics();
-        var progressBox = this.add.graphics();
-        progressBox.fillStyle(0x222222, 0.8);
-        progressBox.fillRect(240, 270, 320, 50);
+    preload(){ 
+        
+        //RESPONSIVE PRELOAD
+        //La barra de carga se ajustará al tamaño de la pestaña
+        //Si se quiere hacer que sea reactiva al cambio durante la carga, 
+        //añadir las variables en la función resize   
         //@ts-ignore
         var width: number = this.game.config.width;        
         //@ts-ignore
         var height: number= this.game.config.height;
-        console.log(width, height);
 
-        var loadingText = this.make.text({
-            x: width/2,
-            y: height/2-50,
-            text: 'Loading...',
-            style: {
-                font: '20px monospace',
-                color: '#ffffff'
-            }
-        });
-        //loadingText.setOrigin(0.5, 0.5);   
+        var heightbar=0.10*height;
+        var widthbar=0.25*width;
+        var ybar=(height-heightbar)/2;
+        var xbar=(width-widthbar)/2;
+        var widthprbar=0.92*widthbar; 
+        var heightprbar=0.60*heightbar;    
+        var yprbar=ybar+((heightbar-heightprbar)/2);
+        var xprbar= xbar +((widthbar- widthprbar)/2);        
+        var heighttext=Math.floor(0.9*heightprbar);
+        var widthtext=0.1*widthprbar;
+        var ytext=yprbar+(heightprbar-heighttext)/2;
+        var xtext=xprbar+(widthprbar-widthtext)/2;
+
+        //PROGRESS AT PRELOAD
+        var progressBar = this.add.graphics();
+        var progressBox = this.add.graphics();
+        progressBox.fillStyle(0x222222, 0.8);
+        progressBox.fillRect(xbar, ybar, widthbar, heightbar);
+
         
         var percentText = this.make.text({
-            x: width/2+120,
-            y: 300,
+            x: xtext,
+            y: ytext,
             text: '0%',
             style: {
-                font: '18px monospace',
+                font: heighttext +'px monospace',
                 color: '#ffffff'
             }
-        }).setDepth(1);
+        }).setDepth(1);        
         //percentText.setOrigin(0.5, 0.5);
 
         var game=this;
@@ -313,14 +321,13 @@ export class LoadingScene extends Phaser.Scene{
         this.load.on("progress", (percent)=>{
             progressBar.clear();
             progressBar.fillStyle(0xffffff, 1);
-            progressBar.fillRect(250, 280, 300 * percent, 30).scale;
+            progressBar.fillRect(xprbar, yprbar, widthprbar * percent, heightprbar);
             percentText.setText(parseInt(percent)* 100 + '%');
         });
 
         this.load.on("complete", ()=>{
             progressBar.destroy();
             progressBox.destroy();
-            loadingText.destroy();
             percentText.destroy();
         });
   
@@ -349,6 +356,7 @@ export class LoadingScene extends Phaser.Scene{
 
         //@ts-ignore
         this.cameras.main.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
+        //this.cameras.main.setSize(this.layersActivas[0].width/4);
         //@ts-ignore
         this.physics.world.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
 
@@ -358,6 +366,7 @@ export class LoadingScene extends Phaser.Scene{
         this.player.setScale(0.1);
         this.player.setCollideWorldBounds(true);
         this.player.setDepth(1);
+        //this.player.body.setSize(this.player.width, this.player.height/2, false);
         this.physics.add.collider(this.player, this.layersActivas[1]);
         this.cameras.main.startFollow(this.player, true, 0.4, 0.4);
   
@@ -385,7 +394,7 @@ export class LoadingScene extends Phaser.Scene{
         }
     }
   
-    resize (gameSize, baseSize, displaySize, resolution)
+    /*resize (gameSize, baseSize, displaySize, resolution)
     {
         var width = gameSize.width;
         var height = gameSize.height;
@@ -397,5 +406,5 @@ export class LoadingScene extends Phaser.Scene{
         }
         //this.layer1.setSize(width, height);
         //this.solid.setSize(width, height);
-    }
+    }*/
   }
