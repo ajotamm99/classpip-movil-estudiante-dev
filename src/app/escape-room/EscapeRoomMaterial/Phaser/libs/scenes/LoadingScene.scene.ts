@@ -89,7 +89,6 @@ export class LoadingScene extends Phaser.Scene{
     player: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
     image: Phaser.GameObjects.Image;
 
-
     preload(){ 
         //RESPONSIVE PRELOAD
         //La barra de carga se ajustará al tamaño de la pestaña
@@ -326,7 +325,6 @@ export class LoadingScene extends Phaser.Scene{
                 );
         });
 
-
         this.load.on("progress", (percent)=>{
             progressBar.clear();
             progressBar.fillStyle(0xffffff, 1);
@@ -355,21 +353,22 @@ export class LoadingScene extends Phaser.Scene{
         this.tilesheets.push(this.maps[0].addTilesetImage('tilesetincial','1tiles'));
         
         this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0],0,0).setDepth(0).setOrigin(0,0));
-        this.layersActivas[0].setX(((this.widthWindow-this.layersActivas[0].width)/2));
-        //t.setOrigin(0.5,0.5);
+        //this.layersActivas[0].setX(((this.widthWindow-this.layersActivas[0].width)/2));
+
         this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0],0,0).setDepth(2).setOrigin(0,0));
-        this.layersActivas[1].setX(((this.widthWindow-this.layersActivas[1].width)/2));
-        //solid.setOrigin(0.5,0.5);  
+        //this.layersActivas[1].setX(((this.widthWindow-this.layersActivas[1].width)/2));
+
         this.layersActivas[1].setCollisionByProperty({collides: true})
 
         //@ts-ignore
         this.cameras.main.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
         //@ts-ignore
         this.physics.world.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
-
+        
+        
 
         //@ts-ignore
-        this.player= this.physics.add.image(this.game.config.width/2 + 150, this.game.config.height/2,'1skinimg');
+        this.player= this.physics.add.image(this.layersActivas[0].width/2 + 150, this.game.config.height/2,'1skinimg');
         //En este caso lo escalo manualmente, hay que fijarse al subir las skins de que 
         //tienen que ser de un tamaño similar a los tiles de la escena
         this.player.setScale(0.1);
