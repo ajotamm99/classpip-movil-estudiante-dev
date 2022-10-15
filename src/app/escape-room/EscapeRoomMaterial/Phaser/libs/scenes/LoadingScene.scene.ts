@@ -21,7 +21,8 @@ import { EscapeRoomPageModule } from 'src/app/escape-room/escape-room.module';
 
 export class LoadingScene extends Phaser.Scene{
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-
+    maincam: Phaser.Cameras.Scene2D.Camera;
+    bag: Phaser.GameObjects.Image;
 
     constructor() {
         super({ 
@@ -76,9 +77,14 @@ export class LoadingScene extends Phaser.Scene{
     SkinDatos: Skin;
     Preguntas: Pregunta[]=[];
     PreguntasActivas: PreguntaActiva[]=[];
-    tiempo: number;
+    tiempoActual: number;
+    tiempoActualSeg: number;
     mecanica: string;
-    puntos: number;
+    puntosTotal: number;
+    nota: number;
+    penalizacion: number;    
+    tiemposEscenas: number[]=[];
+
 
     //variables escenas
     maps: Phaser.Tilemaps.Tilemap[]=[];
@@ -88,6 +94,9 @@ export class LoadingScene extends Phaser.Scene{
     layersActivas: Phaser.Tilemaps.TilemapLayer[]=[];    
     player: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
     image: Phaser.GameObjects.Image;
+    textEscenas:Phaser.GameObjects.Text;
+    contadorEscenas: number;
+    camera2: Phaser.Cameras.Scene2D.Camera;
 
     preload(){ 
         //RESPONSIVE PRELOAD
@@ -113,6 +122,7 @@ export class LoadingScene extends Phaser.Scene{
         var widthtext=0.1*widthprbar;
         var ytext=yprbar+(heightprbar-heighttext)/2;
         var xtext=xprbar+(widthprbar-widthtext)/2;
+        
 
         //PROGRESS AT PRELOAD
         var progressBar = this.add.graphics();
@@ -142,7 +152,7 @@ export class LoadingScene extends Phaser.Scene{
         //this.game.scene.getScenes
         
         this.image= this.add.image(0.5*width,0.1*height,"fondo").setOrigin(0.5,0).setDepth(3);
-
+        this.contadorEscenas=1;
 
         //RECOGEMOS INSCRIPCION
         //@ts-ignore
@@ -343,12 +353,23 @@ export class LoadingScene extends Phaser.Scene{
      * * Phaser will only call create after all assets in Preload have been loaded
      */
     create() {
-
-        this.image.destroy();
-        this.cursors = this.input.keyboard.createCursorKeys();
         
-        console.log('estoy en create');
-        console.log(this.Escenas);
+        this.image.destroy();
+        
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+        this.nota=10;
+
+        for(let i=0; i<this.EscenasActivas.length; i++){
+            this.tiemposEscenas.push(this.EscenasActivas[i].TiempoLimite);
+        }
+        for(let b=0; b<this.PreguntasActivas.length; b++){
+            this.puntosTotal+=this.PreguntasActivas[b].PuntosSumar;
+        }
+        
+        this.maincam= this.cameras.main.setBackgroundColor('#000000');
+
+        //Bucle para crear mapas, objetos y colisiones
         this.maps.push(this.make.tilemap({key:'1map'}));
         this.tilesheets.push(this.maps[0].addTilesetImage('tilesetincial','1tiles'));
         
@@ -357,16 +378,28 @@ export class LoadingScene extends Phaser.Scene{
 
         this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0],0,0).setDepth(2).setOrigin(0,0));
         //this.layersActivas[1].setX(((this.widthWindow-this.layersActivas[1].width)/2));
-
         this.layersActivas[1].setCollisionByProperty({collides: true})
 
+        //Cargamos la mochila y los controles
+        if(this.layersActivas[0].width<=this.widthWindow && this.layersActivas[0].height<=this.HeightWindow-45){
+            this.bag= this.add.image(this.layersActivas[0].width, this.layersActivas[0].height,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+        }else if(this.layersActivas[0].width>=this.widthWindow && this.layersActivas[0].height<=this.HeightWindow-45){
+            this.bag= this.add.image(this.widthWindow, this.layersActivas[0].height,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+        }else if(this.layersActivas[0].width<=this.widthWindow && this.layersActivas[0].height>=this.HeightWindow-45){
+            this.bag= this.add.image(this.layersActivas[0].width, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+        }else{
+            this.bag= this.add.image(this.widthWindow, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+        }
+        
+        //Añadimos la física de las camáras y los bordes del mapa(tambien se podría hacer añadiendo la
+        //propiedad collides: true a los bordes del mapa creado en Tiled)
         //@ts-ignore
         this.cameras.main.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
         //@ts-ignore
         this.physics.world.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
         
-        
 
+        //Añadimos el player
         //@ts-ignore
         this.player= this.physics.add.image(this.layersActivas[0].width/2 + 150, this.game.config.height/2,'1skinimg');
         //En este caso lo escalo manualmente, hay que fijarse al subir las skins de que 
@@ -374,12 +407,22 @@ export class LoadingScene extends Phaser.Scene{
         this.player.setScale(0.1);
         this.player.setCollideWorldBounds(true);
         this.player.setDepth(1);
+        this.player.setOrigin(0,0);
 
         //si queremos modificar el collidebox del sprite
         //this.player.body.setSize(this.player.width, this.player.height/2, false);
         this.physics.add.collider(this.player, this.layersActivas[1]);
         this.cameras.main.startFollow(this.player, true, 0.4, 0.4);
-  
+        //this.cameras.add().startFollow(this.cameras.main)
+        
+        //Texto de tiempo, nota y score
+        this.textEscenas= this.add.text(0,0,'Escena: '+this.contadorEscenas+'/'+this.EscenasActivas.length+'\n'+'Nota: '+this.nota +'\n'+'Tiempo disponible: '+ this.tiemposEscenas[this.contadorEscenas-1])
+        .setDepth(this.layersActivas.length+2).setScrollFactor(0);
+        //this.textScore;
+        //this.textTimer;
+
+        //Función que necesitaremos para re-escalar la mochila y los botones dentro de la pestaña
+        this.scale.on('resize', this.resize, this);
     }
 
     update(time: number, delta: number): void {
@@ -404,17 +447,33 @@ export class LoadingScene extends Phaser.Scene{
         }
     }
   
-    /*resize (gameSize, baseSize, displaySize, resolution)
+    resize (gameSize, baseSize, displaySize, resolution)
     {
+
         var width = gameSize.width;
         var height = gameSize.height;
+        console.log(width, height);
+        this.bag.setX(width);
+        this.bag.setY(height);
     
         this.cameras.resize(width, height);
-    
-        for(let i=0; i<this.layersActivas.length; i++){
-            this.layersActivas[i].setSize(width, height);
+
+        if(this.layersActivas[0].width<=width && this.layersActivas[0].height<=height){
+            this.bag.setPosition(this.layersActivas[0].width,this.layersActivas[0].height);
+        }else if(this.layersActivas[0].width>=width && this.layersActivas[0].height<=height){            
+            this.bag.setPosition(width,this.layersActivas[0].height-5);
+        }else if(this.layersActivas[0].width<=width && this.layersActivas[0].height>=height){            
+            this.bag.setPosition(this.layersActivas[0].width,height-5);
+        }else{
+            
+            this.bag.setPosition(width,height-5);
         }
+    
+        /*for(let i=0; i<this.layersActivas.length; i++){
+            this.layersActivas[i].setSize(width, height);
+        }*/
         //this.layer1.setSize(width, height);
         //this.solid.setSize(width, height);
-    }*/
+    }
+
   }

@@ -67,7 +67,6 @@ export class EscapeRoomPage implements OnInit,OnDestroy {
 
   VolverAtras(){
     this.location.back();
-    console.log(this.game.scene.getScene('preloader').data.get('sesion').DameEscenas());
   }
 
   async ngOnDestroy() {

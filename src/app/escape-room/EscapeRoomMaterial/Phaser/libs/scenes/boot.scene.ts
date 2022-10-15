@@ -17,7 +17,7 @@ export class BootScene extends Phaser.Scene {
 
     preload() {
         this.load.image('fondo','http://localhost:8100/assets/icon/classpip2.png');
-
+        this.load.image('bag', 'http://localhost:8100/assets/escaperoom/bagEscapeRoom.png');
 
     }
     /**
