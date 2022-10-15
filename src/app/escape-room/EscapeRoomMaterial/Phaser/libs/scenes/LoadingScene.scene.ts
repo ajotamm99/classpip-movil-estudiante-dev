@@ -23,6 +23,11 @@ export class LoadingScene extends Phaser.Scene{
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     maincam: Phaser.Cameras.Scene2D.Camera;
     bag: Phaser.GameObjects.Image;
+    timedEvent: Phaser.Time.TimerEvent;
+    timerGlobal: number=0;
+    hiddenTimeStamp: number=0;
+    tiempoEmpleadoTotalMinutos: number;
+    timedEventtest: Phaser.Time.TimerEvent;
 
     constructor() {
         super({ 
@@ -70,15 +75,17 @@ export class LoadingScene extends Phaser.Scene{
     alumno: Alumno;
     alumnos: Alumno[]=[];
     EscenasActivas: EscenaActiva[]=[];
+    EscenaEnCurso: EscenaActiva;
     Escenas: EscenaEscaperoom[]=[];
     ObjetosActivos: ObjetoActivo[]=[];
+    ObjetosActivosEscenaActiva: ObjetoActivo[]=[];
     Objetos:ObjetoEscaperoom[]=[];
     Skin: SkinActiva;
     SkinDatos: Skin;
     Preguntas: Pregunta[]=[];
     PreguntasActivas: PreguntaActiva[]=[];
     tiempoActual: number;
-    tiempoActualSeg: number;
+    tiempoEmpleadoTotal: number;
     mecanica: string;
     puntosTotal: number;
     nota: number;
@@ -353,6 +360,7 @@ export class LoadingScene extends Phaser.Scene{
      * * Phaser will only call create after all assets in Preload have been loaded
      */
     create() {
+        this.EscenaEnCurso= this.EscenasActivas[this.contadorEscenas-1];
         
         this.image.destroy();
         
@@ -370,8 +378,10 @@ export class LoadingScene extends Phaser.Scene{
         this.maincam= this.cameras.main.setBackgroundColor('#000000');
 
         //Bucle para crear mapas, objetos y colisiones
-        this.maps.push(this.make.tilemap({key:'1map'}));
-        this.tilesheets.push(this.maps[0].addTilesetImage('tilesetincial','1tiles'));
+        for(let c=0; c<this.EscenasActivas.length; c++){            
+            this.maps.push(this.make.tilemap({key:(c+1)+'map'}));
+            this.tilesheets.push(this.maps[c].addTilesetImage('tilesetincial',(c+1)+'tiles'));
+        }
         
         this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0],0,0).setDepth(0).setOrigin(0,0));
         //this.layersActivas[0].setX(((this.widthWindow-this.layersActivas[0].width)/2));
@@ -416,16 +426,41 @@ export class LoadingScene extends Phaser.Scene{
         //this.cameras.add().startFollow(this.cameras.main)
         
         //Texto de tiempo, nota y score
-        this.textEscenas= this.add.text(0,0,'Escena: '+this.contadorEscenas+'/'+this.EscenasActivas.length+'\n'+'Nota: '+this.nota +'\n'+'Tiempo disponible: '+ this.tiemposEscenas[this.contadorEscenas-1])
+        this.textEscenas= this.add.text(0,0,'Escena: '+this.contadorEscenas+'/'+this.EscenasActivas.length+'\n'+'Nota: '+this.nota +'\n'+'Tiempo disponible: '+ this.tiemposEscenas[this.contadorEscenas-1]+':00')
         .setDepth(this.layersActivas.length+2).setScrollFactor(0);
-        //this.textScore;
-        //this.textTimer;
 
         //Función que necesitaremos para re-escalar la mochila y los botones dentro de la pestaña
         this.scale.on('resize', this.resize, this);
+
+        //Configuración timer
+        this.timedEvent= this.time.addEvent({ delay: 1000, repeat: this.EscenaEnCurso.TiempoLimite*60, callback: this.onEvent, callbackScope:this });
+        this.timedEventtest= this.time.addEvent({ delay: 3000, callback: this.testDelete, callbackScope:this });
+        
+        //Timer continua aunque se minimize la pestaña para que no hagan trampas
+        
+        this.game.events.on('hidden', () => {
+            this.hiddenTimeStamp = performance.now();
+            });
+
+        this.game.events.on('visible', () => {
+            let elapsedTime = Math.floor((performance.now() - this.hiddenTimeStamp)/1000); //seconds
+            this.timerGlobal += elapsedTime;
+            })
+    
+    
     }
 
     update(time: number, delta: number): void {
+        //TIMECONTROLS
+        if (this.timerGlobal>=this.EscenaEnCurso.TiempoLimite*60){
+            this.onEventFinal(true);
+        }else{
+            this.onEventFinal(false);
+        }
+
+        //NEEDSCONTROL
+
+        //PLAYER CONTROLS
         this.player.setVelocity(0);
 
         if (this.cursors.left.isDown)
@@ -476,4 +511,117 @@ export class LoadingScene extends Phaser.Scene{
         //this.solid.setSize(width, height);
     }
 
+    onEvent(){
+        this.timerGlobal+=1;
+        this.tiempoActual=this.EscenaEnCurso.TiempoLimite*60 - this.timerGlobal;
+        var min=this.tiempoActual/60 | 0;
+        var sec= this.tiempoActual % 60;
+        var secStr: string =sec.toString();
+        if (sec<10){
+            secStr='0'+sec;
+        }
+        this.textEscenas.text='Escena: '+this.contadorEscenas+'/'+this.EscenasActivas.length+'\n'+'Nota: '+this.nota +'\n'+'Tiempo disponible: '+ min+':'+secStr;
+
+    }
+
+    onEventFinal(pasado: boolean){
+        this.contadorEscenas+=1;
+        if(this.contadorEscenas>this.EscenasActivas.length){            
+            this.timedEvent.destroy();
+            if(pasado){
+                this.tiempoEmpleadoTotal+=this.EscenaEnCurso.TiempoLimite*60;
+                this.tiempoEmpleadoTotalMinutos=this.tiempoEmpleadoTotal/60 | 0;                
+            }else{
+                this.tiempoEmpleadoTotal+=this.timerGlobal;
+                this.tiempoEmpleadoTotalMinutos=this.tiempoEmpleadoTotal/60 | 0;
+            }
+            this.juegoTerminado();
+            //Pantalla Juego terminado + fetch post
+        }else{
+            
+            this.timedEvent.destroy();
+            if(pasado){
+                this.tiempoEmpleadoTotal+=this.EscenaEnCurso.TiempoLimite*60;
+                this.tiempoEmpleadoTotalMinutos=this.tiempoEmpleadoTotal/60 | 0;                
+                this.timerGlobal=0;       
+            }else{
+                this.tiempoEmpleadoTotal+=this.timerGlobal;
+                this.tiempoEmpleadoTotalMinutos=this.tiempoEmpleadoTotal/60 | 0;                
+                this.timerGlobal=0;
+            }
+            //Añadir código pasar de escena
+            this.EscenaEnCurso=EscenaActiva[this.contadorEscenas-1];
+            this.changeScene();
+            this.timedEvent=this.time.addEvent({ delay: 1000, repeat: this.EscenaEnCurso.TiempoLimite*60, callback: this.onEvent, callbackScope:this });
+        
+            
+            //this.mapSelected.destroy();
+            //for(let i=0; i<this.layersActivas.length; i++){
+                //this.layersActivas[i].destroy();
+            //}
+            this.textEscenas.text='Escena: '+this.contadorEscenas+'/'+this.EscenasActivas.length+'\n'+'Nota: '+this.nota +'\n'+'Tiempo disponible: '+ this.tiemposEscenas[this.contadorEscenas-1]+':00';
+        
+
+        }
+        
+    }
+
+    changeScene(){
+        this.player.removeAllListeners().destroy();
+        
+        this.physics.world.colliders.destroy();    
+
+        for(let i=0; i<this.layersActivas.length; i++){
+            this.layersActivas[i].removeAllListeners().destroy();
+        }
+        
+        this.layersActivas=[];
+
+        this.layersActivas.push(this.maps[this.contadorEscenas-1].createLayer('suelo',this.tilesheets[this.contadorEscenas-1],0,0).setDepth(0).setOrigin(0,0));
+
+        this.layersActivas.push(this.maps[this.contadorEscenas-1].createLayer('solid', this.tilesheets[this.contadorEscenas-1],0,0).setDepth(2).setOrigin(0,0));
+        this.layersActivas[1].setCollisionByProperty({collides: true});
+
+        //Añadimos la física de las camáras y los bordes del mapa(tambien se podría hacer añadiendo la
+        //propiedad collides: true a los bordes del mapa creado en Tiled)
+        //@ts-ignore
+        this.cameras.main.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
+        //@ts-ignore
+        this.physics.world.setBounds(0, 0, this.layersActivas[0].width, this.layersActivas[0].height);
+        
+
+        //Añadimos el player
+        //@ts-ignore
+        this.player= this.physics.add.image(this.layersActivas[0].width/2 + 150, this.game.config.height/2,'1skinimg');
+        //En este caso lo escalo manualmente, hay que fijarse al subir las skins de que 
+        //tienen que ser de un tamaño similar a los tiles de la escena
+        this.player.setScale(0.1);
+        this.player.setCollideWorldBounds(true);
+        this.player.setDepth(1);
+        this.player.setOrigin(0,0);
+
+        //si queremos modificar el collidebox del sprite
+        //this.player.body.setSize(this.player.width, this.player.height/2, false);
+        this.physics.add.collider(this.player, this.layersActivas[1]);
+        this.cameras.main.startFollow(this.player, true, 0.4, 0.4);
+    }
+
+    testDelete(){
+        this.physics.world.colliders.destroy();    
+
+        for(let i=0; i<this.layersActivas.length; i++){
+            this.layersActivas[i].removeAllListeners().destroy();
+        }
+        
+        this.layersActivas=[];
+        //this.maps[this.contadorEscenas-2].destroy();
+    }
+
+    juegoTerminado(){
+
+    }
+
+    checkRequisitos(){
+
+    }
   }
