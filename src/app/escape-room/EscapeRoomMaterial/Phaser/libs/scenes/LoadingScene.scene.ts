@@ -434,7 +434,7 @@ export class LoadingScene extends Phaser.Scene{
 
         //Configuración timer
         this.timedEvent= this.time.addEvent({ delay: 1000, repeat: this.EscenaEnCurso.TiempoLimite*60, callback: this.onEvent, callbackScope:this });
-        this.timedEventtest= this.time.addEvent({ delay: 3000, callback: this.testDelete, callbackScope:this });
+        //this.timedEventtest= this.time.addEvent({ delay: 3000, callback: this.testDelete, callbackScope:this });
         
         //Timer continua aunque se minimize la pestaña para que no hagan trampas
         
