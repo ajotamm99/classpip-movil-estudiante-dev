@@ -2,7 +2,6 @@ import { SesionService } from '../../../../../servicios/sesion.service';
 //import { Blacksmith, CheapSword, FancySword, Sword } from '@company-name/shared/data-access-model';
 import * as Phaser from 'phaser';
 
-import { ScrollManager } from '../utilities/scroll-manager';
 import { PeticionesAPIService } from 'src/app/servicios';
 
 export class BootScene extends Phaser.Scene {

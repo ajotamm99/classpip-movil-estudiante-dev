@@ -9,10 +9,8 @@ import { EscenaEscaperoom } from './../../../../../clases/clasesParaJuegoDeEscap
 import { EscenaActiva } from './../../../../../clases/clasesParaJuegoDeEscapeRoom/EscenaActiva';
 import { Skin } from './../../../../../clases/clasesParaJuegoDeEscapeRoom/Skin';
 import * as Phaser from 'phaser';
-import { PeticionesAPIService } from 'src/app/servicios'; 
 import { CommonModule } from '@angular/common';
 import { Component, Inject, ModuleWithProviders, NgModule, NgZone, Optional, SkipSelf } from '@angular/core';
-import { ScrollManager } from '../utilities/scroll-manager';
 import { Pregunta } from 'src/app/clases/Pregunta';
 import { Alumno } from 'src/app/clases';
 import { getMatAutocompleteMissingPanelError } from '@angular/material';
@@ -35,6 +33,8 @@ export class LoadingScene extends Phaser.Scene{
     coordinatesStored: Array<any>=[];
     objectlayer: Phaser.GameObjects.Layer;
     exitLayer: Phaser.GameObjects.GameObject[];
+    bagActiva: boolean=false;
+    requisitosCumplidos: boolean= false;
 
     constructor() {
         super({ 
@@ -390,6 +390,7 @@ export class LoadingScene extends Phaser.Scene{
         for(let c=0; c<this.EscenasActivas.length; c++){            
             this.maps.push(this.make.tilemap({key:(c+1).toString()+'map'}));
             this.tilesheets.push(this.maps[c].addTilesetImage('tilesetincial',(c+1).toString()+'tiles'));
+            
         }
         
         this.layersActivas.push(this.maps[0].createLayer('suelo',this.tilesheets[0],0,0).setDepth(0).setOrigin(0,0));
@@ -398,18 +399,27 @@ export class LoadingScene extends Phaser.Scene{
         this.layersActivas.push(this.maps[0].createLayer('solid', this.tilesheets[0],0,0).setDepth(2).setOrigin(0,0));
         //this.layersActivas[1].setX(((this.widthWindow-this.layersActivas[1].width)/2));
         this.layersActivas[1].setCollisionByProperty({collides: true})
+        
+        this.exitLayer= this.maps[0].createFromObjects('salida',{name: ''});
 
         //Cargamos la mochila y los controles
         if(this.layersActivas[0].width<=this.widthWindow && this.layersActivas[0].height<=this.HeightWindow-45){
-            this.bag= this.add.image(this.layersActivas[0].width, this.layersActivas[0].height,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+            this.bag= this.add.image(this.layersActivas[0].width, this.layersActivas[0].height,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive().on('pointerup',()=>{
+                this.MostrarObjetosRecogidos();
+            })
         }else if(this.layersActivas[0].width>=this.widthWindow && this.layersActivas[0].height<=this.HeightWindow-45){
-            this.bag= this.add.image(this.widthWindow, this.layersActivas[0].height,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+            this.bag= this.add.image(this.widthWindow, this.layersActivas[0].height,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive().on('pointerup',()=>{
+                this.MostrarObjetosRecogidos();
+            })
         }else if(this.layersActivas[0].width<=this.widthWindow && this.layersActivas[0].height>=this.HeightWindow-45){
-            this.bag= this.add.image(this.layersActivas[0].width, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+            this.bag= this.add.image(this.layersActivas[0].width, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive().on('pointerup',()=>{
+                this.MostrarObjetosRecogidos();
+            })
         }else{
-            this.bag= this.add.image(this.widthWindow, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
+            this.bag= this.add.image(this.widthWindow, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive().on('pointerup',()=>{
+                this.MostrarObjetosRecogidos();
+            })
         }        
-        this.exitLayer= this.maps[0].createFromObjects('salida',{name:'exit'});
         
         //Añadimos la física de las camáras y los bordes del mapa(tambien se podría hacer añadiendo la
         //propiedad collides: true a los bordes del mapa creado en Tiled)
@@ -444,15 +454,21 @@ export class LoadingScene extends Phaser.Scene{
                 var foundX=vectorXstored.find(sc=>sc ==x);          
                 console.log(foundX);
 
-                console.log(x);
-                if(this.maps[0].getTileAt(x[0],x[1])==null && foundX==undefined && !valid){
+                console.log(this.maps[0].getTileAt(x.x,x.y));
+                if(this.maps[0].getTileAt(x.x,x.y,false,'solid')==null && foundX==undefined && !valid){
                     vectorXstored.push(x);
                     console.log(vectorXstored);
                     //this.objectlayer.add(this.physics.add.sprite(randomX,randomY,(i+1)+'obj'));
                     //this.objectlayer
                     this.imagesObjects.push(this.physics.add.sprite(randomX,randomY,(i+1)+'obj').setImmovable().setDepth(this.layersActivas.length+1));
                     this.physics.add.overlap(this.player, this.imagesObjects[i], ()=>{
-                        console.log('collisiooon');
+                        //se almacena el indice
+                        console.log('collisiooon'+i);
+                        if(this.ObjetosActivos[i].PreguntaBool){
+                            this.ShowDialog(this.imagesObjects[i], i);
+                            //console.log(this.ObjetosActivos[i].PreguntaBool,this.PreguntasActivas.length);
+                            //this.add.image(0,0,i+'preg').setDepth(this.layersActivas.length+2).setOrigin(0,0);
+                        }
 
                     })
                     valid=true;
@@ -629,7 +645,11 @@ export class LoadingScene extends Phaser.Scene{
         this.playerReady=false;
         this.player.removeAllListeners().destroy();
         
-        this.physics.world.colliders.destroy();    
+        this.physics.world.colliders.destroy();
+        for(let b=0; this.imagesObjects.length; b++){
+            this.imagesObjects[b].destroy();
+        }
+        this.imagesObjects=[];
 
         for(let i=0; i<this.layersActivas.length; i++){
             this.layersActivas[i].removeAllListeners().destroy();
@@ -684,6 +704,10 @@ export class LoadingScene extends Phaser.Scene{
         for(let i=0; i<this.layersActivas.length; i++){
             this.layersActivas[i].removeAllListeners().destroy();
         }
+
+        for(let b=0; b<this.imagesObjects.length;b++){
+            this.imagesObjects[b].destroy();
+        }
         //this.maps[0].destroy();
         this.layersActivas=[];
         this.bag.destroy();
@@ -698,4 +722,35 @@ export class LoadingScene extends Phaser.Scene{
     CheckRequisitos(){
 
     }
+
+    
+    ShowDialog(imagen: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, id: number) {
+        console.log(this.PreguntasActivas, this.ObjetosActivos);
+        var pregAct= this.PreguntasActivas.find(pre=>pre.objetoActivoId==this.ObjetosActivos[id].id);
+        //fix en creacion de juego, algo va regular no sube todas las preguntas activas
+        if(pregAct!=null){
+            var preg= this.Preguntas.find(preg=>preg.id== pregAct.preguntaId);
+            
+            if(preg.Imagen!=undefined){
+                //show dialog con imagen
+            }else{
+                //Show dialog sin imagen
+            }
+
+        }
+        
+
+    }
+
+    MostrarObjetosRecogidos(){
+        if(!this.bagActiva){
+            //open dialog
+            this.bagActiva=true;
+        }else{
+            //close diaglog
+            this.bagActiva=false;
+        }
+    }
+
+
   }
