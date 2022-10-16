@@ -426,6 +426,22 @@ export class LoadingScene extends Phaser.Scene{
         this.player.setOrigin(0,0);
         this.player.setVelocity(0);
 
+        //OBJETOS RANDOM
+        for(let i=0; i<this.ObjetosActivos.length; i++){
+            var valid=false;
+            while(!valid){
+                var randomX=Math.floor(this.layersActivas[0].width*Math.random());
+                var randomY=Math.floor(this.layersActivas[0].width*Math.random());
+                        
+                var x=this.maps[0].worldToTileXY(randomX,randomY);
+                console.log(x);
+                if(this.maps[0].getTileAt(x[0],x[1])==null){
+                    this.add.image(randomX,randomY,(i+1)+'obj');
+                    valid=true;
+                }
+            }
+        }
+
         //si queremos modificar el collidebox del sprite
         //this.player.body.setSize(this.player.width, this.player.height/2, false);
         this.physics.add.collider(this.player, this.layersActivas[1]);
@@ -442,7 +458,7 @@ export class LoadingScene extends Phaser.Scene{
 
         //Configuración timer
         this.timedEvent= this.time.addEvent({ delay: 1000, repeat: this.EscenaEnCurso.TiempoLimite*60, callback: this.onEvent, callbackScope:this });
-        this.timedEventtest= this.time.addEvent({ delay: 3000, callback: this.testDelete, callbackScope:this });
+        //this.timedEventtest= this.time.addEvent({ delay: 3000, callback: this.testDelete, callbackScope:this });
         
         //Timer continua aunque se minimize la pestaña para que no hagan trampas
         
@@ -625,14 +641,6 @@ export class LoadingScene extends Phaser.Scene{
     }
 
     testDelete(){
-        /*this.physics.world.colliders.destroy();    
-
-        for(let i=0; i<this.layersActivas.length; i++){
-            this.layersActivas[i].removeAllListeners().destroy();
-        }
-        
-        this.layersActivas=[];
-        //this.maps[this.contadorEscenas-2].destroy();*/
         this.JuegoTerminado();
     }
 
@@ -649,6 +657,7 @@ export class LoadingScene extends Phaser.Scene{
         for(let i=0; i<this.layersActivas.length; i++){
             this.layersActivas[i].removeAllListeners().destroy();
         }
+        //this.maps[0].destroy();
         this.layersActivas=[];
         this.bag.destroy();
         //destroy gamepad too
