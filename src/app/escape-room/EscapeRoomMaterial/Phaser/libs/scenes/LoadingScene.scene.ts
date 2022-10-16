@@ -31,6 +31,10 @@ export class LoadingScene extends Phaser.Scene{
     textTerminado: Phaser.GameObjects.Text;
     playerReady: boolean=false;
     juegoTerminado: boolean=false;
+    imagesObjects: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[]=[];
+    coordinatesStored: Array<any>=[];
+    objectlayer: Phaser.GameObjects.Layer;
+    exitLayer: Phaser.GameObjects.GameObject[];
 
     constructor() {
         super({ 
@@ -404,7 +408,8 @@ export class LoadingScene extends Phaser.Scene{
             this.bag= this.add.image(this.layersActivas[0].width, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
         }else{
             this.bag= this.add.image(this.widthWindow, this.HeightWindow-45,'bag').setOrigin(1,1).setScale(0.2).setScrollFactor(0).setDepth(this.layersActivas.length+1).setAlpha(0.6).setInteractive();  
-        }
+        }        
+        this.exitLayer= this.maps[0].createFromObjects('salida',{name:'exit'});
         
         //Añadimos la física de las camáras y los bordes del mapa(tambien se podría hacer añadiendo la
         //propiedad collides: true a los bordes del mapa creado en Tiled)
@@ -427,16 +432,29 @@ export class LoadingScene extends Phaser.Scene{
         this.player.setVelocity(0);
 
         //OBJETOS RANDOM
+        var vectorXstored: Phaser.Math.Vector2[]=[];
         for(let i=0; i<this.ObjetosActivos.length; i++){
+            console.log(this.ObjetosActivos.length);
             var valid=false;
             while(!valid){
                 var randomX=Math.floor(this.layersActivas[0].width*Math.random());
-                var randomY=Math.floor(this.layersActivas[0].width*Math.random());
+                var randomY=Math.floor(this.layersActivas[0].height*Math.random());
                         
                 var x=this.maps[0].worldToTileXY(randomX,randomY);
+                var foundX=vectorXstored.find(sc=>sc ==x);          
+                console.log(foundX);
+
                 console.log(x);
-                if(this.maps[0].getTileAt(x[0],x[1])==null){
-                    this.add.image(randomX,randomY,(i+1)+'obj');
+                if(this.maps[0].getTileAt(x[0],x[1])==null && foundX==undefined && !valid){
+                    vectorXstored.push(x);
+                    console.log(vectorXstored);
+                    //this.objectlayer.add(this.physics.add.sprite(randomX,randomY,(i+1)+'obj'));
+                    //this.objectlayer
+                    this.imagesObjects.push(this.physics.add.sprite(randomX,randomY,(i+1)+'obj').setImmovable().setDepth(this.layersActivas.length+1));
+                    this.physics.add.overlap(this.player, this.imagesObjects[i], ()=>{
+                        console.log('collisiooon');
+
+                    })
                     valid=true;
                 }
             }
@@ -461,7 +479,6 @@ export class LoadingScene extends Phaser.Scene{
         //this.timedEventtest= this.time.addEvent({ delay: 3000, callback: this.testDelete, callbackScope:this });
         
         //Timer continua aunque se minimize la pestaña para que no hagan trampas
-        
         this.game.events.on('hidden', () => {
             this.hiddenTimeStamp = performance.now();
             });
@@ -472,6 +489,16 @@ export class LoadingScene extends Phaser.Scene{
             })
 
         this.scale.on('resize', this.resize, this);
+
+        //Debug mode to see colliding layer
+        /*
+        const debugGraph= this.add.graphics().setAlpha(0.7).setDepth(5);
+        this.layersActivas[1].renderDebug(debugGraph,{
+            tileColor:null,
+            collidingTileColor: new Phaser.Display.Color(243, 234, 48, 255),
+            faceColor: new Phaser.Display.Color(40, 39, 48, 255),
+
+        })*/
     
     }
 
