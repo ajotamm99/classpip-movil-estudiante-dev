@@ -1,4 +1,6 @@
 import { AwaitLoaderPlugin } from 'phaser3-rex-plugins/plugins/awaitloader-plugin.js';
+import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js'
+import VirtualJoystickPlugin from 'phaser3-rex-plugins/plugins/virtualjoystick-plugin.js';
 import { SesionService } from './../servicios/sesion.service';
 import { PhaserSingletonService } from './EscapeRoomMaterial/Phaser/libs/phaser-singleton.module';
 import { Component, OnInit, NgZone, OnDestroy, ViewChild } from '@angular/core';
@@ -18,6 +20,7 @@ import { SkinActiva } from '../clases/clasesParaJuegoDeEscapeRoom/SkinActiva';
 import { IonContent } from '@ionic/angular';
 import { JuegoDeEscapeRoom } from '../clases/clasesParaJuegoDeEscapeRoom/JuegoDeEscaperoom';
 import { LoadingScene } from './EscapeRoomMaterial/Phaser/libs/scenes/LoadingScene.scene';
+import UIPlugins from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 
 
@@ -54,7 +57,20 @@ export class EscapeRoomPage implements OnInit,OnDestroy {
               plugin: AwaitLoaderPlugin,
               start: true
           },
-        ]},
+          {
+            key: 'rexVirtualJoystick',
+            plugin: VirtualJoystickPlugin,
+            start: true
+        },
+        ],
+        scene:[{
+          
+            key: 'rexUI',
+            plugin: UIPlugin,
+            mapping: 'rexUI'
+        
+        }]
+        },
         scene: [BootScene,LoadingScene],
         render: {
             transparent: false,
@@ -64,7 +80,12 @@ export class EscapeRoomPage implements OnInit,OnDestroy {
       });
     
   }
-
+  /* ,
+          {
+            key: 'rexUI',
+            plugin: UIPlugins,
+            start: true
+          }*/ 
   VolverAtras(){
     this.location.back();
   }
